@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
 export default function Auth() {
-    const { login, signup ,user} = useAuth();
+    const { login, signup } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loginData, setLoginData] = useState({
     email: '',
@@ -23,21 +23,21 @@ export default function Auth() {
 
   
 
-  const handleLoginChange = (e) => {
+  const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLoginData({
       ...loginData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleSignupChange = (e) => {
+  const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSignupData({
       ...signupData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleLoginSubmit = async (e) => {
+  const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -45,10 +45,7 @@ export default function Auth() {
         await login(loginData.email, loginData.password);
         
         toast.success('Logged in successfully!');
-
-
-
-      
+        router.push('/jobseeker');
     } catch (error) {
       console.error('Login error:', error);
     } finally {
@@ -56,7 +53,7 @@ export default function Auth() {
     }
   };
 
-  const handleSignupSubmit = async (e) => {
+  const handleSignupSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     
