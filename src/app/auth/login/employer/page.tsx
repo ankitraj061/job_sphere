@@ -6,7 +6,7 @@
   import { useRouter } from 'next/navigation';
 
   export default function Auth() {
-      const { login, signup ,user} = useAuth();
+      const { login, signup } = useAuth();
     const [isLogin, setIsLogin] = useState(true);
     const [loginData, setLoginData] = useState({
       email: '',
@@ -23,7 +23,7 @@
 
     
 
-    const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement> ) => {
+    const handleLoginChange = (e : React.ChangeEvent<HTMLInputElement>) => {
       setLoginData({
         ...loginData,
         [e.target.name]: e.target.value

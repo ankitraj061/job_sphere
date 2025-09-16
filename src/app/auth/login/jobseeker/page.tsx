@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
 export default function Auth() {
-    const { login, signup ,user} = useAuth();
+    const { login, signup } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loginData, setLoginData] = useState({
     email: '',
@@ -45,10 +45,7 @@ export default function Auth() {
         await login(loginData.email, loginData.password);
         
         toast.success('Logged in successfully!');
-
-
-
-      
+        router.push('/jobseeker');
     } catch (error) {
       console.error('Login error:', error);
     } finally {
