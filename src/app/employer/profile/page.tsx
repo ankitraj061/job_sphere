@@ -11,27 +11,32 @@ const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function EmployerProfilePage() {
   const [loading, setLoading] = useState(true);
-  const [profileStatus, setProfileStatus] = useState(null);
-  const [profileData, setProfileData] = useState(null);
+  const [profileStatus, setProfileStatus] = useState<{
+  nextStep: string | null;
+} | null>(null);
+  const [profileData, setProfileData] = useState<any>(null);
   const [name, setName] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<string | null>(null);
 
   // Fetch profile status from API
   const fetchProfileStatus = async () => {
-    try {
-      const res = await axios.get(`${backendUrl}/api/employer/profile-status`, { withCredentials: true });
-      setProfileStatus(res.data.data.profileStatus);
-      setName(res.data.data.user?.name || '');
-      if (res.data.data.profileStatus.nextStep === 'complete') {
-        await fetchProfile();
-      }
-    } catch (error) {
-      console.error('Failed to fetch profile status', error);
-    } finally {
-      setLoading(false);
+  try {
+    const res = await axios.get(`${backendUrl}/api/employer/profile-status`, { withCredentials: true });
+    const status = res.data.data.profileStatus;
+    setProfileStatus(status);
+    setName(res.data.data.user?.name || '');
+    if (status.nextStep === 'complete') {
+      await fetchProfile();
     }
-  };
+    return status; // ✅ return status
+  } catch (error) {
+    console.error('Failed to fetch profile status', error);
+    return null;
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Fetch full profile data for completed profiles
   const fetchProfile = async () => {
@@ -59,23 +64,31 @@ export default function EmployerProfilePage() {
   };
 
   // Called when a step form successfully completes
- const onStepComplete = async () => {
-  // Re-fetch profile status to get updated nextStep after form submission
-  await fetchProfileStatus();
+const onStepComplete = async () => {
+  const newStatus = await fetchProfileStatus(); // ✅ use return value
 
-  if (profileStatus?.nextStep === 'complete') {
-    // All steps done → close modal & show profile view
+  if (newStatus?.nextStep === 'complete') {
     setModalOpen(false);
     await fetchProfile();
     setCurrentStep(null);
-  } else {
-    // Else open next form modal by updating currentStep
-    setCurrentStep(profileStatus.nextStep);
+  } else if (newStatus?.nextStep) {
+    setCurrentStep(newStatus.nextStep);
   }
 };
 
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 flex items-center justify-center">
+        <div className="bg-green-950 rounded-2xl p-6 border border-green-700 shadow-2xl">
+          <div className="flex items-center gap-4">
+            <div className="w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-xl text-green-200 font-semibold">Loading company information...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (!profileStatus) return <div>Unable to load profile status.</div>;
 
   // If profile completed, show profile view immediately
@@ -91,7 +104,11 @@ export default function EmployerProfilePage() {
           Your profile is incomplete. Please complete your profile to continue.
         </p>
         <button
-          onClick={() => openModalAtStep(profileStatus.nextStep)}
+          onClick={() => {
+            if (profileStatus.nextStep) {
+              openModalAtStep(profileStatus.nextStep);
+            }
+          }}
           className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
           Complete Profile

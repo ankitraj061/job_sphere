@@ -19,7 +19,7 @@ const navItems = [
   { label: 'Dashboard', href: '/employer', icon: HomeIcon },
   { label: 'Jobs', href: '/employer/jobs', icon: BriefcaseIcon },
   { label: 'Applicants', href: '/employer/applicants', icon: UsersIcon },
-  { label: 'Company Profile', href: '/employer/company', icon: BuildingOfficeIcon },
+  { label: 'Company Profile', href: '/employer/company-profile', icon: BuildingOfficeIcon },
   { label: 'profile', href: '/employer/profile', icon: UserIcon },
 ];
 
@@ -70,17 +70,6 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        {/* Post New Job Button */}
-        <div className="px-6 pb-6 pt-4">
-          <button
-            type="button"
-            id="create-job-btn"
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-[#79a17c] px-3 py-2 font-semibold text-[#2f4a2d] hover:bg-[#6b8d5c] active:bg-[#5e7c50] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#75966f]"
-          >
-            <PlusIcon className="h-5 w-5" aria-hidden="true" />
-            Post New Job
-          </button>
-        </div>
         {/* Sign Out Link - bottom */}
         <div className="px-6 pb-6 mt-auto select-none">
           <button
@@ -94,7 +83,7 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
       {/* Main content */}
-      <main className="ml-56 flex-1 p-8">{children}</main>
+      <main className="ml-56 flex-1 pl-2">{children}</main>
     </div>
   );
 }

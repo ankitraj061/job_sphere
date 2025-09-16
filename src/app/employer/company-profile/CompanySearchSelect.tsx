@@ -1,10 +1,14 @@
-'use client';
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Company } from '../hooks/useCompany'; // adjust import path
 
-export default function CompanySearchSelect({ onCancel, onSelect }) {
-  const [companies, setCompanies] = useState([]);
+interface CompanySearchSelectProps {
+  onCancel: () => void;
+  onSelect: (company: Company) => void;
+}
+
+export default function CompanySearchSelect({ onCancel, onSelect }: CompanySearchSelectProps) {
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -13,7 +17,7 @@ export default function CompanySearchSelect({ onCancel, onSelect }) {
   const fetchCompanies = async (query = '') => {
     setLoading(true);
     try {
-      const res = await axios.get(`${backendUrl}/api/company/search?query=${encodeURIComponent(query)}`);
+      const res = await axios.get(`${backendUrl}/api/employer/companies/search?query=${encodeURIComponent(query)}`);
       setCompanies(res.data.data || []);
     } catch (err) {
       console.error(err);

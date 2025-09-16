@@ -1,3 +1,7 @@
+import EmployerJobsPage from "./EmployerJobPage";
+
 export default function JobPage(){
-    return <div>Job Page</div>
+    return (
+        <EmployerJobsPage/>
+    )
 }
