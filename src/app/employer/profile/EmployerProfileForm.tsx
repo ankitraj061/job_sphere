@@ -18,7 +18,7 @@ export default function EmployerProfileForm({ onComplete }: Props) {
   const [formData, setFormData] = useState({
     jobTitle: '',
     department: '',
-    role: '',  // new field for role
+    role: '',
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -33,8 +33,12 @@ export default function EmployerProfileForm({ onComplete }: Props) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
-      const res = await axios.post(`${backendUrl}/api/employer/profile`, formData, { withCredentials: true });
+      const res = await axios.post(`${backendUrl}/api/employer/profile`, formData, {
+        withCredentials: true,
+      });
+
       if (res.data.success) {
         onComplete();
       } else {
@@ -48,45 +52,60 @@ export default function EmployerProfileForm({ onComplete }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Step 2: Employer Profile Details</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md mx-auto space-y-5 bg-white shadow-md rounded-xl p-6"
+    >
+      <h2 className="text-2xl font-bold text-green-700 mb-4">Step 2: Employer Profile Details</h2>
 
+      {/* Job Title */}
       <div>
-        <label className="block mb-1 font-medium">Job Title</label>
+        <label htmlFor="jobTitle" className="block mb-1 font-medium text-gray-700">
+          Job Title
+        </label>
         <input
+          id="jobTitle"
           type="text"
           name="jobTitle"
           value={formData.jobTitle}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
           required
           minLength={2}
           maxLength={100}
         />
       </div>
 
+      {/* Department */}
       <div>
-        <label className="block mb-1 font-medium">Department</label>
+        <label htmlFor="department" className="block mb-1 font-medium text-gray-700">
+          Department
+        </label>
         <input
+          id="department"
           type="text"
           name="department"
           value={formData.department}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
           required
           minLength={2}
           maxLength={50}
         />
       </div>
 
+      {/* Role */}
       <div>
-        <label className="block mb-1 font-medium">Role</label>
+        <label htmlFor="role" className="block mb-1 font-medium text-gray-700">
+          Role
+        </label>
         <select
+          id="role"
           name="role"
           value={formData.role}
           onChange={handleChange}
           required
-          className="w-full px-3 py-2 border rounded"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-500 focus:outline-none"
         >
           <option value="" disabled>
             Select role
@@ -99,12 +118,22 @@ export default function EmployerProfileForm({ onComplete }: Props) {
         </select>
       </div>
 
-      {error && <p className="text-red-600">{error}</p>}
+      {/* Error Message */}
+      {error && (
+        <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-lg p-2">
+          {error}
+        </p>
+      )}
 
+      {/* Submit Button */}
       <button
         type="submit"
         disabled={loading}
-        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        className={`w-full px-4 py-2 rounded-lg text-white font-semibold shadow-md transition ${
+          loading
+            ? 'bg-green-400 cursor-not-allowed'
+            : 'bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300'
+        }`}
       >
         {loading ? 'Saving...' : 'Next'}
       </button>

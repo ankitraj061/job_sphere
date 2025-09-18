@@ -6,11 +6,10 @@ import axios from 'axios';
 
 interface Props {
   onComplete: () => void;
-  defaultName?: string; 
+  defaultName?: string;
 }
 
-export default function BasicDetailsForm({ onComplete, defaultName}: Props) {
-
+export default function BasicDetailsForm({ onComplete, defaultName = '' }: Props) {
   const [formData, setFormData] = useState({
     name: defaultName,
     phone: '',
@@ -23,15 +22,21 @@ export default function BasicDetailsForm({ onComplete, defaultName}: Props) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
-      const res = await axios.put(`${backendUrl}/api/employer/basic-details`, formData, { withCredentials: true });
+      const res = await axios.put(
+        `${backendUrl}/api/employer/basic-details`,
+        formData,
+        { withCredentials: true }
+      );
+
       if (res.data.success) {
         onComplete();
       } else {
@@ -45,69 +50,83 @@ export default function BasicDetailsForm({ onComplete, defaultName}: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Step 1: Basic Details</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md mx-auto bg-white shadow-md rounded-xl p-6 space-y-6"
+    >
+      <h2 className="text-2xl font-bold text-green-700">
+        Step 1: Basic Details
+      </h2>
 
+      {/* Name */}
       <div>
-        <label className="block mb-1 font-medium">Name</label>
+        <label className="block mb-1 font-medium text-gray-700">Name</label>
         <input
           type="text"
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
           required
           minLength={2}
           maxLength={50}
         />
       </div>
 
+      {/* Phone */}
       <div>
-        <label className="block mb-1 font-medium">Phone</label>
+        <label className="block mb-1 font-medium text-gray-700">Phone</label>
         <input
-          type="text"
+          type="tel"
           name="phone"
           value={formData.phone}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
           required
           minLength={10}
           maxLength={15}
+          pattern="[0-9]{10,15}"
         />
       </div>
 
+      {/* Location */}
       <div>
-        <label className="block mb-1 font-medium">Location</label>
+        <label className="block mb-1 font-medium text-gray-700">Location</label>
         <input
           type="text"
           name="location"
           value={formData.location}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
           required
           minLength={2}
           maxLength={100}
         />
       </div>
 
+      {/* Profile Picture */}
       <div>
-        <label className="block mb-1 font-medium">Profile Picture URL (optional)</label>
+        <label className="block mb-1 font-medium text-gray-700">
+          Profile Picture URL (optional)
+        </label>
         <input
           type="url"
           name="profilePicture"
           value={formData.profilePicture}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
           placeholder="https://example.com/image.jpg"
         />
       </div>
 
-      {error && <p className="text-red-600">{error}</p>}
+      {/* Error */}
+      {error && <p className="text-red-600 text-sm">{error}</p>}
 
+      {/* Submit Button */}
       <button
         type="submit"
         disabled={loading}
-        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        className="w-full px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition active:scale-95 disabled:opacity-50"
       >
         {loading ? 'Saving...' : 'Next'}
       </button>

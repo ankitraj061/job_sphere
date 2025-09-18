@@ -36,11 +36,16 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "foundedYear" ? (value ? Number(value) : undefined) : value,
+      [name]:
+        name === 'foundedYear' ? (value ? Number(value) : undefined) : value,
     }));
   };
 
@@ -60,7 +65,11 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
     setError(null);
     setLoading(true);
     try {
-      const res = await axios.post(`${backendUrl}/api/employer/companies`, formData, { withCredentials: true });
+      const res = await axios.post(
+        `${backendUrl}/api/employer/companies`,
+        formData,
+        { withCredentials: true }
+      );
       if (res.data.success) {
         onSuccess(res.data.data);
       } else {
@@ -74,11 +83,17 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
   };
 
   return (
-    <div className="p-4 bg-white rounded shadow max-w-md mx-auto">
-      <h3 className="text-xl font-semibold mb-4">Create New Company</h3>
+    <div className="p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 max-w-md mx-auto">
+      <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6 text-center">
+        Create New Company
+      </h3>
 
-      <div className="mb-3">
-        <label className="block font-medium mb-1" htmlFor="name">
+      {/* Company Name */}
+      <div className="mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          htmlFor="name"
+        >
           Company Name <span className="text-red-500">*</span>
         </label>
         <input
@@ -87,14 +102,18 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
           type="text"
           value={formData.name}
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           required
           minLength={2}
         />
       </div>
 
-      <div className="mb-3">
-        <label className="block font-medium mb-1" htmlFor="description">
+      {/* Description */}
+      <div className="mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          htmlFor="description"
+        >
           Description
         </label>
         <textarea
@@ -103,13 +122,17 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
           value={formData.description}
           onChange={handleChange}
           rows={3}
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           maxLength={1000}
         />
       </div>
 
-      <div className="mb-3">
-        <label className="block font-medium mb-1" htmlFor="website">
+      {/* Website */}
+      <div className="mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          htmlFor="website"
+        >
           Website
         </label>
         <input
@@ -119,12 +142,16 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
           placeholder="https://example.com"
           value={formData.website}
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      <div className="mb-3">
-        <label className="block font-medium mb-1" htmlFor="industry">
+      {/* Industry */}
+      <div className="mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          htmlFor="industry"
+        >
           Industry <span className="text-red-500">*</span>
         </label>
         <input
@@ -133,14 +160,18 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
           type="text"
           value={formData.industry}
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           required
           minLength={2}
         />
       </div>
 
-      <div className="mb-3">
-        <label className="block font-medium mb-1" htmlFor="location">
+      {/* Location */}
+      <div className="mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          htmlFor="location"
+        >
           Location
         </label>
         <input
@@ -149,12 +180,16 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
           type="text"
           value={formData.location}
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      <div className="mb-3">
-        <label className="block font-medium mb-1" htmlFor="size">
+      {/* Size */}
+      <div className="mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          htmlFor="size"
+        >
           Company Size <span className="text-red-500">*</span>
         </label>
         <select
@@ -163,7 +198,7 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
           value={formData.size}
           onChange={handleChange}
           required
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="">Select size</option>
           <option value="STARTUP_1_10">Startup (1-10)</option>
@@ -174,8 +209,12 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
         </select>
       </div>
 
-      <div className="mb-3">
-        <label className="block font-medium mb-1" htmlFor="foundedYear">
+      {/* Founded Year */}
+      <div className="mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          htmlFor="foundedYear"
+        >
           Founded Year
         </label>
         <input
@@ -186,12 +225,16 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
           max={new Date().getFullYear()}
           value={formData.foundedYear || ''}
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      <div className="mb-3">
-        <label className="block font-medium mb-1" htmlFor="profilePicture">
+      {/* Profile Picture */}
+      <div className="mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-1"
+          htmlFor="profilePicture"
+        >
           Profile Picture URL
         </label>
         <input
@@ -201,24 +244,30 @@ export default function CompanyCreateForm({ onCancel, onSuccess }: Props) {
           placeholder="https://example.com/logo.png"
           value={formData.profilePicture}
           onChange={handleChange}
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      {error && <p className="text-red-600 mb-3">{error}</p>}
+      {/* Error */}
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
+          {error}
+        </p>
+      )}
 
-      <div className="flex justify-end gap-2">
+      {/* Actions */}
+      <div className="flex justify-end gap-3">
         <button
           onClick={onCancel}
           disabled={loading}
-          className="px-4 py-2 rounded border border-gray-400 hover:bg-gray-100"
+          className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
         >
           Cancel
         </button>
         <button
           onClick={handleCreate}
           disabled={loading}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md transition disabled:opacity-50"
         >
           {loading ? 'Creating...' : 'Create'}
         </button>

@@ -357,223 +357,226 @@
 
 
     return (
-        <div className="max-w-6xl mx-auto pt-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-10">
+      <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
-            <h1 className="text-3xl font-bold text-gray-800 flex-grow">
-            Job Postings
-            </h1>
-            <div className="flex gap-3 flex-wrap w-full md:w-auto md:flex-nowrap items-center">
-            {/* Search */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <h1 className="text-3xl font-bold text-gray-900">Job Postings</h1>
+          <div className="flex gap-4 flex-wrap w-full md:w-auto md:flex-nowrap items-center">
             <input
-                type="text"
-                placeholder="Search jobs..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="px-3 py-2 border rounded-md shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none flex-grow"
+              type="text"
+              placeholder="Search jobs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="rounded-xl px-4 py-3 bg-gray-50 border-none focus:ring-2 focus:ring-blue-500 shadow transition-all text-lg"
             />
             <button
-                onClick={() => {
+              onClick={() => {
                 setPage(1);
                 fetchJobs();
-                }}
-                className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-600"
+              }}
+              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg font-semibold transition"
             >
-                Search
+              Search
             </button>
-
-            {/* Status Filter */}
             <select
-                value={statusFilter}
-                onChange={(e) => {
+              value={statusFilter}
+              onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setPage(1);
-                }}
-                className="px-3 py-2 border rounded-md shadow-sm"
+              }}
+              className="rounded-xl px-4 py-3 bg-gray-50 border-none focus:ring-2 focus:ring-blue-500 text-lg shadow transition"
             >
-                <option value="All Status">All Status</option>
-                <option value="ACTIVE">Active</option>
-                <option value="PAUSED">Paused</option>
-                <option value="COMPLETED">Completed</option>
+              <option value="All Status">All Status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="PAUSED">Paused</option>
+              <option value="COMPLETED">Completed</option>
             </select>
-
-            {/* Create Job Button */}
             <button
-                className="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-600"
-                onClick={() => {
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg font-semibold transition"
+              onClick={() => {
                 setEditingJob(null);
                 setDrawerOpen(true);
-                }}
+              }}
             >
-                <FiPlus /> Create Job Posting
+              <FiPlus /> Create Job Posting
             </button>
-            </div>
+          </div>
         </div>
 
         {/* Job List */}
         {loading ? (
-            <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 flex items-center justify-center">
-                <div className="bg-green-950 rounded-2xl p-6 border border-green-700 shadow-2xl">
-                <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-xl text-green-200 font-semibold">Loading company information...</p>
-                </div>
-                </div>
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="flex items-center gap-4 bg-white/80 p-8 rounded-2xl shadow-lg border border-white/20">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-gray-700 text-lg font-semibold">Loading jobs...</p>
             </div>
+          </div>
         ) : jobs.length === 0 ? (
-            <p className="text-gray-500">No jobs found.</p>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-12 mt-8 text-center">
+            <div className="mx-auto mb-6 w-24 h-24 flex items-center justify-center rounded-xl bg-blue-100">
+              <FiUsers className="w-12 h-12 text-blue-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-4">No jobs found</h3>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              There are no jobs to show. Adjust your search or create a new posting.
+            </p>
+          </div>
         ) : (
-            <div className="space-y-6">
+          <div className="space-y-6">
             {jobs.map((job) => (
-                <div
+              <div
                 key={job.id}
-                className="border rounded-lg p-6 bg-white shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4 relative"
-                >
-                {/* Job Info */}
+                className="bg-white/90 backdrop-blur-sm border border-white/30 rounded-2xl shadow-xl p-6 grid grid-cols-1 md:grid-cols-3 gap-8 hover:shadow-2xl transition-all relative"
+              >
                 <div className="md:col-span-2">
-                    <h2 className="text-xl font-semibold text-gray-900">
-                    {job.title}
-                    </h2>
-                    <div className="flex flex-wrap items-center text-gray-500 text-sm gap-x-4 gap-y-1 mt-1">
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">{job.title}</h2>
+                  <div className="flex flex-wrap gap-4 text-gray-500 text-sm mb-2">
                     <span>{job.role || "-"}</span>
                     {job.location && (
-                        <span className="flex items-center gap-1">
-                        <FiMapPin className="text-gray-400" /> {job.location}
-                        </span>
+                      <span className="flex items-center gap-1">
+                        <FiMapPin className="text-blue-400" /> {job.location}
+                      </span>
                     )}
-                    </div>
-                    <p className="text-gray-700 mt-2 line-clamp-2">
-                    {job.description}
-                    </p>
-
-                    {/* Job Meta */}
-                    <div className="flex flex-wrap items-center gap-6 mt-4 text-gray-600 text-sm">
-                    <span className="flex items-center gap-1">
-                        <FiDollarSign className="text-gray-400" />
-                        {job.salaryMin ? job.salaryMin / 1000 + "k" : "N/A"} -{" "}
-                        {job.salaryMax ? job.salaryMax / 1000 + "k" : "N/A"}
+                  </div>
+                  <p className="text-gray-700 mt-2 line-clamp-2">{job.description}</p>
+                  <div className="flex flex-wrap gap-3 mt-4">
+                    <span className="flex items-center gap-1 bg-blue-50 px-3 py-1 rounded-lg font-medium text-blue-700">
+                      <FiDollarSign className="text-blue-400" />
+                      {job.salaryMin ? job.salaryMin / 1000 + "k" : "N/A"} -{" "}
+                      {job.salaryMax ? job.salaryMax / 1000 + "k" : "N/A"}
                     </span>
-                    <span className="flex items-center gap-1">
-                        <FiUsers className="text-gray-400" />
-                        {job.totalApplications} applicants
+                    <span className="flex items-center gap-1 bg-purple-50 px-3 py-1 rounded-lg font-medium text-purple-700">
+                      <FiUsers className="text-purple-400" />
+                      {job.totalApplications} applicants
                     </span>
-                    <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gray-200">
-                        {job.jobType.replace("_", "-")}
+                    <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-blue-200 to-indigo-200 text-blue-700">
+                      {job.jobType.replace("_", "-")}
                     </span>
-
-                    {/* Status Badge */}
                     <span
-                        className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                      className={`px-3 py-1 text-xs font-semibold rounded-full ${
                         job.status === "ACTIVE"
-                            ? "bg-green-500 text-white"
-                            : job.status === "PAUSED"
-                            ? "bg-yellow-400 text-black"
-                            : "bg-gray-500 text-white"
-                        }`}
+                          ? "bg-blue-600 text-white"
+                          : job.status === "PAUSED"
+                          ? "bg-yellow-400 text-black"
+                          : "bg-gray-300 text-gray-700"
+                      }`}
                     >
-                        {job.status.charAt(0).toUpperCase() +
+                      {job.status.charAt(0).toUpperCase() +
                         job.status.slice(1).toLowerCase()}
                     </span>
-                    </div>
+                  </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex justify-end items-start relative">
-                    <button
+                {/* Actions Dropdown */}
+                <div className="flex flex-col gap-2 items-end justify-start relative z-100">
+                  <button
                     onClick={() => toggleDropdown(job.id)}
-                    className="p-2 rounded hover:bg-gray-200"
-                    >
-                    <FiMoreVertical />
-                    </button>
-
-                    {dropdownOpen === job.id && (
-                    <div className="absolute right-0 top-10 w-48 bg-white border rounded-md shadow-lg z-50">
-                        <ul className="text-sm text-gray-700">
+                    className="p-2 rounded-full hover:bg-blue-50 transition"
+                  >
+                    <FiMoreVertical className="w-6 h-6 text-gray-700" />
+                  </button>
+                  {dropdownOpen === job.id && (
+                    <div className="absolute right-0 top-12 w-56 bg-white/95 border border-blue-100 rounded-xl shadow-2xl z-50 overflow-hidden">
+                      <ul className="text-sm text-gray-700 divide-y">
                         <li
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                            onClick={() => {
+                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-blue-50 transition"
+                          onClick={() => {
                             setEditingJob(job);
                             setDrawerOpen(true);
                             setDropdownOpen(null);
-                            }}
+                          }}
                         >
-                            <FiEdit className="text-blue-500" />
-                            Update Job
+                          <span className="inline-flex w-8 h-8 items-center justify-center bg-blue-500 rounded-xl shadow">
+                            <FiEdit className="text-white" />
+                          </span>
+                          Update Job
                         </li>
                         <li
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                            onClick={() => {
+                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-green-50 transition"
+                          onClick={() => {
                             setStatusUpdateJob(job);
                             setStatusModalOpen(true);
                             setDropdownOpen(null);
-                            }}
+                          }}
                         >
-                            <FiPlayCircle className="text-green-500" />
-                            Update Job Status
+                          <span className="inline-flex w-8 h-8 items-center justify-center bg-green-500 rounded-xl shadow">
+                            <FiPlayCircle className="text-white" />
+                          </span>
+                          Update Job Status
                         </li>
                         <li
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600 flex items-center gap-2"
-                            onClick={() => {
+                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer text-red-600 hover:bg-red-50 transition"
+                          onClick={() => {
                             setJobToDelete(job);
                             setDeleteModalOpen(true);
                             setDropdownOpen(null);
-                            }}
+                          }}
                         >
-                            <FiTrash2 />
-                            Delete Job
+                          <span className="inline-flex w-8 h-8 items-center justify-center bg-red-500 rounded-xl shadow">
+                            <FiTrash2 className="text-white" />
+                          </span>
+                          Delete Job
                         </li>
                         <li
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                            onClick={() => handleOpenJobFormModal(job.id, false)}
+                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-purple-50 transition"
+                          onClick={() => handleOpenJobFormModal(job.id, false)}
                         >
-                            <MdOutlineCreateNewFolder className="text-purple-500" /> 
-                            Create Job Form
+                          <span className="inline-flex w-8 h-8 items-center justify-center bg-purple-500 rounded-xl shadow">
+                            <MdOutlineCreateNewFolder className="text-white" />
+                          </span>
+                          Create Job Form
                         </li>
                         <li
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                            onClick={() => handleOpenJobFormModal(job.id, true)}
+                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-blue-50 transition"
+                          onClick={() => handleOpenJobFormModal(job.id, true)}
                         >
-                            <FiEdit className="text-blue-500" />
-                            Update Job Form
+                          <span className="inline-flex w-8 h-8 items-center justify-center bg-blue-500 rounded-xl shadow">
+                            <FiEdit className="text-white" />
+                          </span>
+                          Update Job Form
                         </li>
                         <li
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                        onClick={() => handlePreviewJobForm(job.id)}
+                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-gray-50 transition"
+                          onClick={() => handlePreviewJobForm(job.id)}
                         >
-                        <FiUsers className="text-gray-600" />
-                        Preview Job Form
+                          <span className="inline-flex w-8 h-8 items-center justify-center bg-indigo-500 rounded-xl shadow">
+                            <FiUsers className="text-white" />
+                          </span>
+                          Preview Job Form
                         </li>
-                        </ul>
+                      </ul>
                     </div>
-                    )}
+                  )}
                 </div>
-                </div>
+              </div>
             ))}
-            </div>
+          </div>
         )}
 
         {/* Pagination */}
         {totalPages > 1 && (
-            <div className="flex justify-center mt-8 gap-2">
+          <div className="flex justify-center items-center gap-3 mt-10 bg-white/80 rounded-xl shadow-lg p-4 border border-white/20">
             <button
-                onClick={() => setPage(Math.max(1, page - 1))}
-                disabled={page === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page === 1}
+              className="px-6 py-2 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition disabled:opacity-40"
             >
-                Previous
+              Previous
             </button>
-            <span className="px-3 py-1">
-                Page {page} of {totalPages}
+            <span className="px-4 py-2 font-bold text-blue-700 rounded-lg">
+              Page {page} of {totalPages}
             </span>
             <button
-                onClick={() => setPage(Math.min(totalPages, page + 1))}
-                disabled={page === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
+              onClick={() => setPage(Math.min(totalPages, page + 1))}
+              disabled={page === totalPages}
+              className="px-6 py-2 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition disabled:opacity-40"
             >
-                Next
+              Next
             </button>
-            </div>
+          </div>
         )}
+        </div>
 
         {/* Job Create/Edit Modal */}
         <JobCreateModal
@@ -686,5 +689,5 @@
         )}
         </div>
     );
-    }
+}
     

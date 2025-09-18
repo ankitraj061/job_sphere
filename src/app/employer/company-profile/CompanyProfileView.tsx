@@ -54,172 +54,170 @@ export default function CompanyProfileView({ company, onDelete, onUpdate }: Prop
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 p-2 w-full">
-  <div className="w-full max-w-full">
-    {!editing ? (
-      <div className="bg-green-950 rounded-xl shadow-xl border border-green-800 overflow-hidden w-full">
-        {/* Header Section */}
-        <div className="bg-gradient-to-r from-green-700 via-green-600 to-emerald-600 px-4 py-6 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-green-500 opacity-20 rounded-full transform translate-x-10 -translate-y-10"></div>
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-emerald-400 opacity-20 rounded-full transform -translate-x-8 translate-y-8"></div>
-          <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-green-400 opacity-10 rounded-full"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 w-full">
+      <div className="w-full mx-auto">
+        {!editing ? (
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
+            {/* Header Section */}
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 px-6 py-8 text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-28 h-28 bg-white opacity-10 rounded-full transform translate-x-12 -translate-y-12"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full transform -translate-x-10 translate-y-10"></div>
 
-          <div className="relative z-10 flex items-start gap-4">
-            <div className="flex-shrink-0">
-              {company.profilePicture ? (
-                <img
-                  src={company.profilePicture}
-                  alt={`${company.name} logo`}
-                  className="w-16 h-16 bg-white rounded-lg object-contain p-2 shadow-md border-2 border-green-400"
-                />
-              ) : (
-                <div className="w-16 h-16 bg-green-500 bg-opacity-30 rounded-lg flex items-center justify-center border-2 border-green-400 shadow-md">
-                  <span className="text-xl font-bold text-green-100">{company.name.charAt(0)}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold mb-2 text-white">{company.name}</h1>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="bg-green-500 bg-opacity-30 px-2 py-1 rounded-full border border-green-400">
-                  🏢 {company.industry}
-                </span>
-                {company.location && (
-                  <span className="bg-emerald-500 bg-opacity-30 px-2 py-1 rounded-full border border-emerald-400">
-                    📍 {company.location}
-                  </span>
-                )}
-                {company.foundedYear && (
-                  <span className="bg-green-600 bg-opacity-40 px-2 py-1 rounded-full border border-green-300">
-                    🗓️ Founded {company.foundedYear}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="px-4 py-4 bg-green-900 border-b border-green-700">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="text-center bg-green-800 rounded-lg p-3 border border-green-600 shadow">
-              <div className="text-xl font-bold text-green-200 mb-1">{company.employeeCount}</div>
-              <div className="text-green-400 text-xs">Employees</div>
-            </div>
-            <div className="text-center bg-emerald-800 rounded-lg p-3 border border-emerald-600 shadow">
-              <div className="text-xl font-bold text-emerald-200 mb-1">{company.activeJobsCount}</div>
-              <div className="text-emerald-400 text-xs">Active Jobs</div>
-            </div>
-            <div className="text-center bg-green-700 rounded-lg p-3 border border-green-500 shadow">
-              <div className="text-base font-bold text-green-100 mb-1">{company.myRole}</div>
-              <div className="text-green-300 text-xs">Your Role</div>
-            </div>
-            <div className="text-center bg-emerald-700 rounded-lg p-3 border border-emerald-500 shadow">
-              <div className="text-base font-bold text-emerald-100 mb-1">
-                {new Date(company.joinedAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  year: "numeric",
-                })}
-              </div>
-              <div className="text-emerald-300 text-xs">Joined</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Content Section */}
-        <div className="px-4 py-6 bg-green-950">
-          <div className="grid lg:grid-cols-2 gap-4">
-            <div className="bg-green-900 rounded-lg p-4 border border-green-700 shadow">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-green-600 rounded-md flex items-center justify-center">
-                  <span className="text-base">📖</span>
-                </div>
-                <h3 className="text-lg font-semibold text-green-100">About Company</h3>
-              </div>
-              <p className="text-green-300 leading-relaxed text-sm">
-                {company.description || "No description provided."}
-              </p>
-            </div>
-
-            <div className="bg-emerald-900 rounded-lg p-4 border border-emerald-700 shadow">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-emerald-600 rounded-md flex items-center justify-center">
-                  <span className="text-base">🏬</span>
-                </div>
-                <h3 className="text-lg font-semibold text-emerald-100">Company Details</h3>
-              </div>
-              <div className="space-y-3">
-                {company.website && (
-                  <div className="flex items-center gap-3 p-3 bg-emerald-800 rounded-md border border-emerald-600">
-                    <div className="w-8 h-8 bg-emerald-600 rounded-md flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm">🌐</span>
+              <div className="relative z-10 flex items-start gap-4">
+                <div className="flex-shrink-0">
+                  {company.profilePicture ? (
+                    <img
+                      src={company.profilePicture}
+                      alt={`${company.name} logo`}
+                      className="w-16 h-16 bg-white rounded-lg object-contain p-2 shadow-md border-2 border-indigo-300"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-indigo-200 rounded-lg flex items-center justify-center border-2 border-indigo-400 shadow-md">
+                      <span className="text-xl font-bold text-indigo-700">{company.name.charAt(0)}</span>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-xs text-emerald-400 mb-0.5">Website</div>
-                      <a
-                        href={company.website}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-emerald-200 hover:text-emerald-100 font-medium hover:underline text-sm"
-                      >
-                        {company.website.replace(/^https?:\/\//, "")}
-                      </a>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
-                <div className="flex items-center gap-3 p-3 bg-green-800 rounded-md border border-green-600">
-                  <div className="w-8 h-8 bg-green-600 rounded-md flex items-center justify-center flex-shrink-0">
-                    <span className="text-sm">👥</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-xs text-green-400 mb-0.5">Company Size</div>
-                    <div className="font-semibold text-green-100 text-sm">
-                      {formatCompanySize(company.size)}
-                    </div>
+                <div className="flex-1">
+                  <h1 className="text-2xl font-bold mb-2">{company.name}</h1>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="bg-white/20 px-2 py-1 rounded-full border border-white/30">
+                      🏢 {company.industry}
+                    </span>
+                    {company.location && (
+                      <span className="bg-white/20 px-2 py-1 rounded-full border border-white/30">
+                        📍 {company.location}
+                      </span>
+                    )}
+                    {company.foundedYear && (
+                      <span className="bg-white/20 px-2 py-1 rounded-full border border-white/30">
+                        🗓️ Founded {company.foundedYear}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="px-4 py-4 bg-green-900 border-t border-green-700">
-          <div className="flex flex-wrap gap-3 justify-end">
-            <button
-              onClick={() => setEditing(true)}
-              className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-md hover:from-green-500 hover:to-emerald-500 font-medium transition-all duration-200 flex items-center gap-2 shadow text-sm border border-green-500"
-            >
-              ✏️ Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              className="px-4 py-2 bg-gradient-to-r from-red-700 to-red-600 text-white rounded-md hover:from-red-600 hover:to-red-500 font-medium transition-all duration-200 flex items-center gap-2 shadow text-sm border border-red-500"
-            >
-              🗑️ Delete
-            </button>
+            {/* Stats Section */}
+            <div className="px-6 py-6 bg-white/70 backdrop-blur-sm border-b border-gray-200">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="text-center bg-white/60 rounded-xl p-4 border border-gray-200 shadow-sm">
+                  <div className="text-xl font-bold text-indigo-700 mb-1">{company.employeeCount}</div>
+                  <div className="text-gray-500 text-xs">Employees</div>
+                </div>
+                <div className="text-center bg-white/60 rounded-xl p-4 border border-gray-200 shadow-sm">
+                  <div className="text-xl font-bold text-indigo-700 mb-1">{company.activeJobsCount}</div>
+                  <div className="text-gray-500 text-xs">Active Jobs</div>
+                </div>
+                <div className="text-center bg-white/60 rounded-xl p-4 border border-gray-200 shadow-sm">
+                  <div className="text-base font-bold text-indigo-600 mb-1">{company.myRole}</div>
+                  <div className="text-gray-500 text-xs">Your Role</div>
+                </div>
+                <div className="text-center bg-white/60 rounded-xl p-4 border border-gray-200 shadow-sm">
+                  <div className="text-base font-bold text-indigo-600 mb-1">
+                    {new Date(company.joinedAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </div>
+                  <div className="text-gray-500 text-xs">Joined</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content Section */}
+            <div className="px-6 py-8 bg-white/70 backdrop-blur-sm">
+              <div className="grid lg:grid-cols-2 gap-6">
+                <div className="bg-white/60 rounded-xl p-5 border border-gray-200 shadow-sm">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
+                      <span className="text-base">📖</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-700">About Company</h3>
+                  </div>
+                  <p className="text-gray-600 leading-relaxed text-sm">
+                    {company.description || "No description provided."}
+                  </p>
+                </div>
+
+                <div className="bg-white/60 rounded-xl p-5 border border-gray-200 shadow-sm">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 bg-indigo-100 rounded-md flex items-center justify-center">
+                      <span className="text-base">🏬</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-700">Company Details</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {company.website && (
+                      <div className="flex items-center gap-3 p-3 bg-white/50 rounded-md border border-gray-200">
+                        <div className="w-8 h-8 bg-indigo-200 rounded-md flex items-center justify-center flex-shrink-0">
+                          <span className="text-sm">🌐</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-xs text-gray-500 mb-0.5">Website</div>
+                          <a
+                            href={company.website}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-indigo-600 hover:text-indigo-800 font-medium hover:underline text-sm"
+                          >
+                            {company.website.replace(/^https?:\/\//, "")}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3 p-3 bg-white/50 rounded-md border border-gray-200">
+                      <div className="w-8 h-8 bg-blue-200 rounded-md flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm">👥</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-xs text-gray-500 mb-0.5">Company Size</div>
+                        <div className="font-semibold text-gray-700 text-sm">
+                          {formatCompanySize(company.size)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="px-6 py-4 bg-white/80 backdrop-blur-sm border-t border-gray-200">
+              <div className="flex flex-wrap gap-3 justify-end">
+                <button
+                  onClick={() => setEditing(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-medium transition-all duration-200 flex items-center gap-2 shadow text-sm"
+                >
+                  ✏️ Edit
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-lg hover:from-red-700 hover:to-rose-700 font-medium transition-all duration-200 flex items-center gap-2 shadow text-sm"
+                >
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <CompanyEditForm
+            company={company}
+            onCancel={() => setEditing(false)}
+            onSuccess={(updatedCompany) => {
+              setEditing(false);
+              if (onUpdate) onUpdate(updatedCompany);
+            }}
+          />
+        )}
       </div>
-    ) : (
-      <CompanyEditForm
-        company={company}
-        onCancel={() => setEditing(false)}
-        onSuccess={(updatedCompany) => {
-          setEditing(false);
-          if (onUpdate) onUpdate(updatedCompany);
-        }}
-      />
-    )}
-  </div>
-</div>
-
+    </div>
   );
 }
 
-// Helper to format backend size enum to readable format
+// Format company size enum
 function formatCompanySize(size?: string) {
   switch (size) {
     case 'STARTUP_1_10':
@@ -264,7 +262,6 @@ function CompanyEditForm({
 
   const onSubmit = async (data: CompanyUpdateData) => {
     try {
-      // Clean the data - remove empty strings and convert them to undefined/null
       const cleanData: CompanyUpdateData = {
         name: data.name.trim(),
         industry: data.industry.trim(),
@@ -278,31 +275,24 @@ function CompanyEditForm({
 
       const res = await axios.put(`${backendUrl}/api/employer/companies`, cleanData, { 
         withCredentials: true,
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (res.data.success) {
-        // Merge the updated data with the original company data to preserve read-only fields
         const updatedCompany: Company = {
-          ...company, // Keep original data (employeeCount, activeJobsCount, etc.)
-          ...res.data.data, // Override with updated data from backend
+          ...company,
+          ...res.data.data,
           updatedAt: res.data.data.updatedAt || new Date().toISOString()
         };
         
         onSuccess(updatedCompany);
         reset(cleanData);
-        
-        // Show success message
         alert('Company profile updated successfully!');
       } else {
         alert(res.data.message || 'Update failed');
       }
     } catch (err: any) {
       console.error('Error updating company:', err);
-      
-      // Handle different error types
       if (err.response?.data?.message) {
         alert(err.response.data.message);
       } else if (err.response?.status === 409) {
@@ -318,220 +308,180 @@ function CompanyEditForm({
   };
 
   return (
-    <div className="bg-green-950 rounded-xl shadow-xl border border-green-800 overflow-hidden w-full">
-  {/* Header */}
-  <div className="bg-gradient-to-r from-green-700 via-green-600 to-emerald-600 px-6 py-6 text-white relative overflow-hidden">
-    <div className="absolute top-0 right-0 w-24 h-24 bg-green-400 opacity-20 rounded-full transform translate-x-12 -translate-y-12"></div>
-    <div className="absolute bottom-0 left-0 w-20 h-20 bg-emerald-400 opacity-20 rounded-full transform -translate-x-8 translate-y-8"></div>
-    <div className="relative z-10">
-      <h2 className="text-2xl font-bold mb-1">Edit Company Profile</h2>
-      <p className="text-green-100 text-sm">Update your company information</p>
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 px-6 py-8 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-10 rounded-full transform translate-x-12 -translate-y-12"></div>
+        <div className="absolute bottom-0 left-0 w-20 h-20 bg-white opacity-10 rounded-full transform -translate-x-8 translate-y-8"></div>
+        <div className="relative z-10">
+          <h2 className="text-2xl font-bold mb-1">Edit Company Profile</h2>
+          <p className="text-blue-100 text-sm">Update your company information</p>
+        </div>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-8 bg-white/70 backdrop-blur-sm">
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Company Name */}
+          <div className="lg:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Company Name *</label>
+            <input
+              {...register("name", {
+                required: "Company name is required",
+                minLength: { value: 2, message: "Company name must be at least 2 characters" },
+                maxLength: { value: 100, message: "Company name must be less than 100 characters" }
+              })}
+              className={`w-full border rounded-lg px-4 py-2.5 bg-white/60 text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all placeholder-gray-400 ${
+                errors.name ? "border-red-500 bg-red-50" : "border-gray-300"
+              }`}
+              placeholder="Enter company name"
+            />
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-2">{errors.name.message}</p>
+            )}
+          </div>
+
+          {/* Description */}
+          <div className="lg:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+            <textarea
+              {...register("description", {
+                maxLength: { value: 1000, message: "Description must be less than 1000 characters" }
+              })}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white/60 text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 transition-all placeholder-gray-400"
+              rows={4}
+              placeholder="Describe your company..."
+            />
+            {errors.description && (
+              <p className="text-red-500 text-xs mt-2">{errors.description.message}</p>
+            )}
+          </div>
+
+          {/* Website */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Website</label>
+            <input
+              {...register("website", {
+                pattern: {
+                  value: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
+                  message: "Please enter a valid website URL"
+                }
+              })}
+              type="url"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white/60 text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 placeholder-gray-400"
+              placeholder="https://example.com"
+            />
+            {errors.website && (
+              <p className="text-red-500 text-xs mt-2">{errors.website.message}</p>
+            )}
+          </div>
+
+          {/* Industry */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Industry *</label>
+            <input
+              {...register("industry", {
+                required: "Industry is required",
+                minLength: { value: 2, message: "Industry must be at least 2 characters" },
+                maxLength: { value: 50, message: "Industry must be less than 50 characters" }
+              })}
+              className={`w-full border rounded-lg px-4 py-2.5 bg-white/60 text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 placeholder-gray-400 ${
+                errors.industry ? "border-red-500 bg-red-50" : "border-gray-300"
+              }`}
+              placeholder="e.g. Technology, Healthcare"
+            />
+            {errors.industry && (
+              <p className="text-red-500 text-xs mt-2">{errors.industry.message}</p>
+            )}
+          </div>
+
+          {/* Location */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+            <input
+              {...register("location", {
+                maxLength: { value: 100, message: "Location must be less than 100 characters" }
+              })}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white/60 text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 placeholder-gray-400"
+              placeholder="e.g. San Francisco, CA"
+            />
+            {errors.location && (
+              <p className="text-red-500 text-xs mt-2">{errors.location.message}</p>
+            )}
+          </div>
+
+          {/* Profile Picture */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Profile Picture URL</label>
+            <input
+              {...register("profilePicture", {
+                pattern: {
+                  value: /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg|webp))$/i,
+                  message: "Please enter a valid image URL"
+                }
+              })}
+              type="url"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white/60 text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 placeholder-gray-400"
+              placeholder="https://example.com/logo.png"
+            />
+            {errors.profilePicture && (
+              <p className="text-red-500 text-xs mt-2">{errors.profilePicture.message}</p>
+            )}
+          </div>
+
+          {/* Company Size */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Company Size</label>
+            <select
+              {...register("size")}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white/60 text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400"
+            >
+              <option value="">Select company size</option>
+              <option value="STARTUP_1_10">Startup (1-10)</option>
+              <option value="SMALL_11_50">Small (11-50)</option>
+              <option value="MEDIUM_51_200">Medium (51-200)</option>
+              <option value="LARGE_201_1000">Large (201-1000)</option>
+              <option value="ENTERPRISE_1000_PLUS">Enterprise (1000+)</option>
+            </select>
+          </div>
+
+          {/* Founded Year */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Founded Year</label>
+            <input
+              {...register("foundedYear", {
+                min: { value: 1000, message: "Year must be valid" },
+                max: { value: new Date().getFullYear(), message: "Year cannot be in the future" }
+              })}
+              type="number"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 bg-white/60 text-gray-700 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-400 placeholder-gray-400"
+              placeholder="e.g. 2010"
+            />
+            {errors.foundedYear && (
+              <p className="text-red-500 text-xs mt-2">{errors.foundedYear.message}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap justify-end gap-3 mt-8">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-5 py-2.5 bg-gray-200/80 text-gray-700 rounded-lg hover:bg-gray-300 font-medium transition-all duration-200 text-sm shadow-sm"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-medium transition-all duration-200 flex items-center gap-2 shadow text-sm disabled:opacity-60"
+          >
+            {isSubmitting ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+      </form>
     </div>
-  </div>
-
-  {/* Form */}
-  <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-8 bg-green-950">
-    <div className="grid lg:grid-cols-2 gap-6">
-      {/* Company Name */}
-      <div className="lg:col-span-2">
-        <label className="block text-sm font-semibold text-green-200 mb-2">
-          Company Name *
-        </label>
-        <input
-          {...register("name", {
-            required: "Company name is required",
-            minLength: { value: 2, message: "Company name must be at least 2 characters" },
-            maxLength: { value: 100, message: "Company name must be less than 100 characters" }
-          })}
-          className={`w-full border rounded-lg px-4 py-2.5 bg-green-900 text-green-100 text-sm focus:ring-2 focus:ring-green-600 focus:border-green-500 transition-all placeholder-green-400 ${
-            errors.name ? "border-red-500 bg-red-950" : "border-green-700"
-          }`}
-          placeholder="Enter company name"
-        />
-        {errors.name && (
-          <p className="text-red-400 text-xs mt-2 flex items-center gap-1 bg-red-900 bg-opacity-50 p-2 rounded-md border border-red-700">
-            <span>❌</span> {errors.name.message}
-          </p>
-        )}
-      </div>
-
-      {/* Description */}
-      <div className="lg:col-span-2">
-        <label className="block text-sm font-semibold text-green-200 mb-2">
-          Description
-        </label>
-        <textarea
-          {...register("description", {
-            maxLength: { value: 1000, message: "Description must be less than 1000 characters" }
-          })}
-          className="w-full border border-green-700 rounded-lg px-4 py-2.5 bg-green-900 text-green-100 text-sm focus:ring-2 focus:ring-green-600 focus:border-green-500 transition-all placeholder-green-400"
-          rows={4}
-          placeholder="Describe your company..."
-        />
-        {errors.description && (
-          <p className="text-red-400 text-xs mt-2 flex items-center gap-1 bg-red-900 bg-opacity-50 p-2 rounded-md border border-red-700">
-            <span>❌</span> {errors.description.message}
-          </p>
-        )}
-      </div>
-
-      {/* Website */}
-      <div>
-        <label className="block text-sm font-semibold text-green-200 mb-2">
-          Website
-        </label>
-        <input
-          {...register("website", {
-            pattern: {
-              value: /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
-              message: "Please enter a valid website URL"
-            }
-          })}
-          type="url"
-          className="w-full border border-green-700 rounded-lg px-4 py-2.5 bg-green-900 text-green-100 text-sm focus:ring-2 focus:ring-green-600 focus:border-green-500 placeholder-green-400"
-          placeholder="https://example.com"
-        />
-        {errors.website && (
-          <p className="text-red-400 text-xs mt-2 flex items-center gap-1 bg-red-900 bg-opacity-50 p-2 rounded-md border border-red-700">
-            <span>❌</span> {errors.website.message}
-          </p>
-        )}
-      </div>
-
-      {/* Industry */}
-      <div>
-        <label className="block text-sm font-semibold text-green-200 mb-2">
-          Industry *
-        </label>
-        <input
-          {...register("industry", {
-            required: "Industry is required",
-            minLength: { value: 2, message: "Industry must be at least 2 characters" },
-            maxLength: { value: 50, message: "Industry must be less than 50 characters" }
-          })}
-          className={`w-full border rounded-lg px-4 py-2.5 bg-green-900 text-green-100 text-sm focus:ring-2 focus:ring-green-600 focus:border-green-500 placeholder-green-400 ${
-            errors.industry ? "border-red-500 bg-red-950" : "border-green-700"
-          }`}
-          placeholder="e.g. Technology, Healthcare"
-        />
-        {errors.industry && (
-          <p className="text-red-400 text-xs mt-2 flex items-center gap-1 bg-red-900 bg-opacity-50 p-2 rounded-md border border-red-700">
-            <span>❌</span> {errors.industry.message}
-          </p>
-        )}
-      </div>
-
-      {/* Location */}
-      <div>
-        <label className="block text-sm font-semibold text-green-200 mb-2">
-          Location
-        </label>
-        <input
-          {...register("location", {
-            maxLength: { value: 100, message: "Location must be less than 100 characters" }
-          })}
-          className="w-full border border-green-700 rounded-lg px-4 py-2.5 bg-green-900 text-green-100 text-sm focus:ring-2 focus:ring-green-600 focus:border-green-500 placeholder-green-400"
-          placeholder="City, Country"
-        />
-        {errors.location && (
-          <p className="text-red-400 text-xs mt-2 flex items-center gap-1 bg-red-900 bg-opacity-50 p-2 rounded-md border border-red-700">
-            <span>❌</span> {errors.location.message}
-          </p>
-        )}
-      </div>
-
-      {/* Size */}
-      <div>
-        <label className="block text-sm font-semibold text-green-200 mb-2">
-          Company Size
-        </label>
-        <select
-          {...register("size")}
-          className="w-full border border-green-700 rounded-lg px-4 py-2.5 bg-green-900 text-green-100 text-sm focus:ring-2 focus:ring-green-600 focus:border-green-500"
-        >
-          <option value="" className="bg-green-900">Select company size</option>
-          <option value="STARTUP_1_10" className="bg-green-900">Startup (1-10)</option>
-          <option value="SMALL_11_50" className="bg-green-900">Small (11-50)</option>
-          <option value="MEDIUM_51_200" className="bg-green-900">Medium (51-200)</option>
-          <option value="LARGE_201_1000" className="bg-green-900">Large (201-1000)</option>
-          <option value="ENTERPRISE_1000_PLUS" className="bg-green-900">Enterprise (1000+)</option>
-        </select>
-      </div>
-
-      {/* Founded Year */}
-      <div>
-        <label className="block text-sm font-semibold text-green-200 mb-2">
-          Founded Year
-        </label>
-        <input
-          {...register("foundedYear", {
-            valueAsNumber: true,
-            min: { value: 1800, message: "Year must be after 1800" },
-            max: { value: new Date().getFullYear(), message: "Year cannot be in the future" }
-          })}
-          type="number"
-          className="w-full border border-green-700 rounded-lg px-4 py-2.5 bg-green-900 text-green-100 text-sm focus:ring-2 focus:ring-green-600 focus:border-green-500 placeholder-green-400"
-          placeholder="e.g. 2010"
-          min="1800"
-          max={new Date().getFullYear()}
-        />
-        {errors.foundedYear && (
-          <p className="text-red-400 text-xs mt-2 flex items-center gap-1 bg-red-900 bg-opacity-50 p-2 rounded-md border border-red-700">
-            <span>❌</span> {errors.foundedYear.message}
-          </p>
-        )}
-      </div>
-
-      {/* Profile Picture */}
-      <div>
-        <label className="block text-sm font-semibold text-green-200 mb-2">
-          Profile Picture URL
-        </label>
-        <input
-          {...register("profilePicture", {
-            pattern: {
-              value: /^(https?:\/\/).*\.(jpg|jpeg|png|gif|webp)$/i,
-              message: "Please enter a valid image URL (jpg, jpeg, png, gif, webp)"
-            }
-          })}
-          type="url"
-          className="w-full border border-green-700 rounded-lg px-4 py-2.5 bg-green-900 text-green-100 text-sm focus:ring-2 focus:ring-green-600 focus:border-green-500 placeholder-green-400"
-          placeholder="https://example.com/logo.png"
-        />
-        {errors.profilePicture && (
-          <p className="text-red-400 text-xs mt-2 flex items-center gap-1 bg-red-900 bg-opacity-50 p-2 rounded-md border border-red-700">
-            <span>❌</span> {errors.profilePicture.message}
-          </p>
-        )}
-      </div>
-    </div>
-
-    {/* Actions */}
-    <div className="flex flex-wrap justify-end gap-4 mt-8 pt-6 border-t border-green-700">
-      <button
-        type="button"
-        onClick={onCancel}
-        className="px-5 py-2.5 rounded-lg border border-green-600 text-green-200 hover:bg-green-800 font-medium transition-all text-sm"
-      >
-        Cancel
-      </button>
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-500 hover:to-emerald-500 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow text-sm border border-green-500"
-      >
-        {isSubmitting ? (
-          <span className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            Saving...
-          </span>
-        ) : (
-          "Save Changes"
-        )}
-      </button>
-    </div>
-  </form>
-</div>
-
   );
 }
+

@@ -12,8 +12,8 @@ const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 export default function EmployerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [profileStatus, setProfileStatus] = useState<{
-  nextStep: string | null;
-} | null>(null);
+    nextStep: string | null;
+  } | null>(null);
   const [profileData, setProfileData] = useState<any>(null);
   const [name, setName] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -21,27 +21,32 @@ export default function EmployerProfilePage() {
 
   // Fetch profile status from API
   const fetchProfileStatus = async () => {
-  try {
-    const res = await axios.get(`${backendUrl}/api/employer/profile-status`, { withCredentials: true });
-    const status = res.data.data.profileStatus;
-    setProfileStatus(status);
-    setName(res.data.data.user?.name || '');
-    if (status.nextStep === 'complete') {
-      await fetchProfile();
+    try {
+      const res = await axios.get(
+        `${backendUrl}/api/employer/profile-status`,
+        { withCredentials: true }
+      );
+      const status = res.data.data.profileStatus;
+      setProfileStatus(status);
+      setName(res.data.data.user?.name || '');
+      if (status.nextStep === 'complete') {
+        await fetchProfile();
+      }
+      return status; // ✅ return status
+    } catch (error) {
+      console.error('Failed to fetch profile status', error);
+      return null;
+    } finally {
+      setLoading(false);
     }
-    return status; // ✅ return status
-  } catch (error) {
-    console.error('Failed to fetch profile status', error);
-    return null;
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Fetch full profile data for completed profiles
   const fetchProfile = async () => {
     try {
-      const res = await axios.get(`${backendUrl}/api/employer/profile`, { withCredentials: true });
+      const res = await axios.get(`${backendUrl}/api/employer/profile`, {
+        withCredentials: true,
+      });
       setProfileData(res.data.data);
     } catch (error) {
       console.error('Failed to fetch employer profile', error);
@@ -64,32 +69,40 @@ export default function EmployerProfilePage() {
   };
 
   // Called when a step form successfully completes
-const onStepComplete = async () => {
-  const newStatus = await fetchProfileStatus(); // ✅ use return value
+  const onStepComplete = async () => {
+    const newStatus = await fetchProfileStatus(); // ✅ use return value
 
-  if (newStatus?.nextStep === 'complete') {
-    setModalOpen(false);
-    await fetchProfile();
-    setCurrentStep(null);
-  } else if (newStatus?.nextStep) {
-    setCurrentStep(newStatus.nextStep);
-  }
-};
-
+    if (newStatus?.nextStep === 'complete') {
+      setModalOpen(false);
+      await fetchProfile();
+      setCurrentStep(null);
+    } else if (newStatus?.nextStep) {
+      setCurrentStep(newStatus.nextStep);
+    }
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 flex items-center justify-center">
-        <div className="bg-green-950 rounded-2xl p-6 border border-green-700 shadow-2xl">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl">
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-xl text-green-200 font-semibold">Loading company information...</p>
+            <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-xl text-blue-500 font-semibold">
+              Loading Employer Profile information...
+            </p>
           </div>
         </div>
       </div>
     );
   }
-  if (!profileStatus) return <div>Unable to load profile status.</div>;
+
+  if (!profileStatus) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Unable to load profile status.</p>
+      </div>
+    );
+  }
 
   // If profile completed, show profile view immediately
   if (profileStatus.nextStep === 'complete' && profileData) {
@@ -109,30 +122,43 @@ const onStepComplete = async () => {
               openModalAtStep(profileStatus.nextStep);
             }
           }}
-          className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-6 py-2 bg-gray-100 text-blue-600 rounded-lg shadow hover:from-blue-700 hover:to-indigo-700 transition"
         >
           Complete Profile
         </button>
       </div>
 
       {modalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white p-6 rounded shadow-lg max-w-md w-full" onClick={e => e.stopPropagation()}>
-      {currentStep === 'basic_details' && (
-        <BasicDetailsForm defaultName={name} onComplete={onStepComplete} />
-      )}
-      {currentStep === 'employer_profile' && (
-        <EmployerProfileForm onComplete={onStepComplete} />
-      )}
-      {currentStep === 'company_selection' && (
-        <CompanySelection onComplete={onStepComplete} companyId={profileData?.companyId || null}  />
-      )}
+        <div
+          className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-gray-200/50 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {currentStep === 'basic_details' && (
+              <BasicDetailsForm defaultName={name} onComplete={onStepComplete} />
+            )}
+            {currentStep === 'employer_profile' && (
+              <EmployerProfileForm onComplete={onStepComplete} />
+            )}
+            {currentStep === 'company_selection' && (
+              <CompanySelection
+                onComplete={onStepComplete}
+                companyId={profileData?.companyId || null}
+              />
+            )}
 
-      <button className="mt-4 px-3 py-1 bg-gray-300 rounded hover:bg-gray-400" onClick={() => setModalOpen(false)}>Close</button>
-    </div>
-  </div>
-)}
-
+            <button
+              className="mt-4 px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              onClick={() => setModalOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

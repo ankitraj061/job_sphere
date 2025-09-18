@@ -38,6 +38,15 @@ interface Application {
   responses: ApplicationResponse[];
 }
 
+const STATUS_OPTIONS = [
+  "PENDING",
+  "REVIEWING",
+  "SHORTLISTED",
+  "INTERVIEWED",
+  "ACCEPTED",
+  "REJECTED",
+];
+
 export default function JobApplicantsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
@@ -46,15 +55,17 @@ export default function JobApplicantsPage() {
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [viewingApplicant, setViewingApplicant] = useState<Application | null>(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState<number | null>(null);
 
-  // Fetch all jobs for dropdown on mount
+  // Fetch jobs
   useEffect(() => {
     async function fetchJobs() {
       setLoadingJobs(true);
       try {
         const response = await axios.get(`${backendUrl}/api/jobs/employer`, {
           withCredentials: true,
-          params: { page: 1, limit: 1000 }, // fetch all or large page size
+          params: { page: 1, limit: 1000 },
         });
         if (response.data.success) {
           setJobs(response.data.data.jobs);
@@ -71,7 +82,7 @@ export default function JobApplicantsPage() {
     fetchJobs();
   }, []);
 
-  // Fetch applications when selectedJobId or page changes
+  // Fetch applications
   useEffect(() => {
     if (!selectedJobId) {
       setApplications([]);
@@ -85,10 +96,7 @@ export default function JobApplicantsPage() {
           `${backendUrl}/api/jobs/${selectedJobId}/applications`,
           {
             withCredentials: true,
-            params: {
-              page,
-              limit: 10,
-            },
+            params: { page, limit: 10 },
           }
         );
         if (response.data.success) {
@@ -107,30 +115,50 @@ export default function JobApplicantsPage() {
     fetchApplications();
   }, [selectedJobId, page]);
 
-  // Check for duplicate job titles to show date
-  const jobTitleCounts = jobs.reduce<Record<string, number>>((acc, job) => {
-    acc[job.title] = (acc[job.title] || 0) + 1;
-    return acc;
-  }, {});
+  // Update application status
+  async function updateApplicationStatus(applicationId: number, newStatus: string) {
+    if (!selectedJobId) return;
+    setUpdatingStatusId(applicationId);
+    try {
+      const response = await axios.patch(
+        `${backendUrl}/api/jobs/${selectedJobId}/applications/${applicationId}/status`,
+        { status: newStatus },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        const refreshedApps = await axios.get(
+          `${backendUrl}/api/jobs/${selectedJobId}/applications`,
+          { withCredentials: true, params: { page, limit: 10 } }
+        );
+        setApplications(refreshedApps.data.data.applications);
+      } else {
+        alert("Failed to update status");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error updating status");
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  }
 
   return (
-    <div className="max-w-6xl mx-auto p-4 min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900">
-      <h1 className="text-3xl font-bold mb-6 text-white">Job Applicants</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+      {/* Header */}
+      <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-6">
+        Job Applicants
+      </h1>
 
-      {/* Job selection dropdown */}
+      {/* Job Selector */}
       <div className="mb-6">
         {loadingJobs ? (
-            <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 flex items-center justify-center">
-                <div className="bg-green-950 rounded-2xl p-6 border border-green-700 shadow-2xl">
-                <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-xl text-green-200 font-semibold text-white">Loading company information...</p>
-                </div>
-                </div>
-            </div>
+          <div className="flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 shadow-lg">
+            <div className="w-6 h-6 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
+            <p className="ml-4 text-gray-700 font-medium">Loading Jobs...</p>
+          </div>
         ) : (
           <select
-            className="w-full md:w-96 border rounded p-2 bg-white"
+            className="w-full max-w-md rounded-xl p-3 bg-white/80 border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             value={selectedJobId ?? ""}
             onChange={(e) => {
               const val = e.target.value;
@@ -139,102 +167,164 @@ export default function JobApplicantsPage() {
             }}
           >
             <option value="">Select a job</option>
-            {jobs.map((job) => {
-              const showDate = jobTitleCounts[job.title] > 1;
-              return (
-                <option key={job.id} value={job.id}>
-                  {job.title}
-                  {showDate ? ` — ${new Date(job.createdAt).toLocaleDateString()}` : ""}
-                </option>
-              );
-            })}
+            {jobs.map((job) => (
+              <option key={job.id} value={job.id}>
+                {job.title}
+              </option>
+            ))}
           </select>
         )}
       </div>
 
-      {/* Applications list */}
+      {/* Applications Table */}
       {loadingApplications ? (
-        <p className="text-white">Loading applicants...</p>
+        <p className="text-gray-600">Loading applicants...</p>
+      ) : !selectedJobId ? (
+        <p className="text-gray-600">Please select a job to view applicants.</p>
       ) : applications.length === 0 ? (
-        selectedJobId ? (
-          <p className="text-white" >No applicants found for this job.</p>
-        ) : (
-          <p className="text-white">Please select a job to view applicants.</p>
-        )
+        <p className="text-gray-600">No applicants found for this job.</p>
       ) : (
-        <div className="space-y-6">
-          {applications.map((app) => (
-            <div
-              key={app.id}
-              className="border rounded-lg p-4 bg-white shadow-sm"
-            >
-              <div className="flex items-center space-x-4">
-                {app.jobSeeker.user.profilePicture ? (
-                  <img
-                    src={app.jobSeeker.user.profilePicture}
-                    alt={app.jobSeeker.user.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-gray-600">
-                    {app.jobSeeker.user.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div>
-                  <div className="text-lg font-semibold">{app.jobSeeker.user.name}</div>
-                  <div className="text-sm text-gray-500">{app.jobSeeker.user.email}</div>
-                  {app.jobSeeker.user.phone && (
-                    <div className="text-sm text-gray-500">Phone: {app.jobSeeker.user.phone}</div>
-                  )}
-                  {app.jobSeeker.user.location && (
-                    <div className="text-sm text-gray-500">Location: {app.jobSeeker.user.location}</div>
-                  )}
-                  <div className="text-sm text-gray-600">
-                    Applied on: {new Date(app.appliedAt).toLocaleDateString()}
-                  </div>
-                  <div className="text-sm font-medium">Status: {app.status}</div>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <div className="font-semibold mb-1">Application Responses:</div>
-                {app.responses.length === 0 ? (
-                  <p className="text-sm text-gray-500">No responses provided.</p>
-                ) : (
-                  <ul className="list-disc list-inside text-sm text-gray-700">
-                    {app.responses.map((response) => (
-                      <li key={response.id}>
-                        <span className="font-medium">{response.field.label}:</span> {response.answer}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-          ))}
+        <div className="overflow-x-auto rounded-2xl bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+              <tr>
+                <th className="p-4 text-left w-40 rounded-tl-2xl">Applicant</th>
+                <th className="p-4 text-left">Email</th>
+                <th className="p-4 text-left w-20">Phone</th>
+                <th className="p-4 text-left w-28">Location</th>
+                <th className="p-4 text-left w-36">Applied On</th>
+                <th className="p-4 text-center w-36">Status</th>
+                <th className="p-4 text-center w-32 rounded-tr-2xl"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {applications.map((app) => (
+                <tr key={app.id} className="hover:bg-blue-50 transition">
+                  <td className="p-4 flex items-center space-x-3">
+                    {app.jobSeeker.user.profilePicture ? (
+                      <img
+                        src={app.jobSeeker.user.profilePicture}
+                        alt={app.jobSeeker.user.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full flex items-center justify-center font-bold uppercase">
+                        {app.jobSeeker.user.name.charAt(0)}
+                      </div>
+                    )}
+                    <span className="font-medium text-gray-900">{app.jobSeeker.user.name}</span>
+                  </td>
+                  <td className="p-4 truncate text-gray-700">{app.jobSeeker.user.email}</td>
+                  <td className="p-4 text-gray-700">{app.jobSeeker.user.phone || "-"}</td>
+                  <td className="p-4 text-gray-700">{app.jobSeeker.user.location || "-"}</td>
+                  <td className="p-4 text-gray-700">{new Date(app.appliedAt).toLocaleDateString()}</td>
+                  <td className="p-4 text-center">
+                    <select
+                      disabled={updatingStatusId === app.id}
+                      value={app.status}
+                      onChange={(e) => updateApplicationStatus(app.id, e.target.value)}
+                      className="rounded-md px-2 py-1 font-medium bg-white border border-gray-200 focus:ring-2 focus:ring-blue-500 transition disabled:opacity-50"
+                    >
+                      {STATUS_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {status.charAt(0) + status.slice(1).toLowerCase()}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="p-4 text-center">
+                    <button
+                      onClick={() => setViewingApplicant(app)}
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-3 py-1 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition"
+                      type="button"
+                    >
+                      View Profile
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center mt-6 gap-3">
+            <div className="flex justify-center gap-4 p-4">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="px-4 py-2 border rounded disabled:opacity-50"
+                className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition disabled:opacity-50"
               >
                 Previous
               </button>
-              <span className="px-4 py-2">
+              <span className="text-gray-700 font-medium flex items-center">
                 Page {page} of {totalPages}
               </span>
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="px-4 py-2 border rounded disabled:opacity-50"
+                className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition disabled:opacity-50"
               >
                 Next
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Applicant Modal */}
+      {viewingApplicant && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-auto p-8 relative shadow-2xl border border-gray-200/50">
+            <button
+              className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-2xl font-bold"
+              onClick={() => setViewingApplicant(null)}
+              aria-label="Close profile modal"
+            >
+              ×
+            </button>
+
+            <div className="flex flex-col items-center mb-6">
+              {viewingApplicant.jobSeeker.user.profilePicture ? (
+                <img
+                  src={viewingApplicant.jobSeeker.user.profilePicture}
+                  alt={viewingApplicant.jobSeeker.user.name}
+                  className="w-24 h-24 rounded-full object-cover mb-4"
+                />
+              ) : (
+                <div className="w-24 h-24 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full flex items-center justify-center text-4xl font-bold mb-4">
+                  {viewingApplicant.jobSeeker.user.name.charAt(0)}
+                </div>
+              )}
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                {viewingApplicant.jobSeeker.user.name}
+              </h2>
+              <p className="text-gray-700">{viewingApplicant.jobSeeker.user.email}</p>
+              {viewingApplicant.jobSeeker.user.phone && (
+                <p className="text-gray-700">Phone: {viewingApplicant.jobSeeker.user.phone}</p>
+              )}
+              {viewingApplicant.jobSeeker.user.location && (
+                <p className="text-gray-700">Location: {viewingApplicant.jobSeeker.user.location}</p>
+              )}
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Application Responses
+              </h3>
+              {viewingApplicant.responses.length === 0 ? (
+                <p className="text-gray-600">No responses provided.</p>
+              ) : (
+                <ul className="list-disc list-inside text-gray-700 space-y-2">
+                  {viewingApplicant.responses.map((resp) => (
+                    <li key={resp.id}>
+                      <span className="font-semibold">{resp.field.label}:</span>{" "}
+                      {resp.answer}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

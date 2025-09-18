@@ -45,13 +45,13 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f6faf7] font-sans">
+    <div className="flex min-h-screen bg-blue-500 font-sans">
       {/* Sidebar */}
-      <aside className="fixed top-0 left-0 h-screen w-56 flex flex-col bg-[#416b46] text-white z-20">
+      <aside className="fixed top-0 left-0 h-screen w-56 flex flex-col bg-blue-600 text-white z-20">
         {/* Logo */}
-        <div className="py-8 px-6 text-center border-b border-[#365c39]">
+        <div className="py-8 px-6 text-center border-b border-white/10">
           <h1 className="text-2xl font-extrabold tracking-wide select-none">JobSphere</h1>
-          <p className="text-xs font-light text-[#a3b493] mt-1 select-none">Hiring Platform</p>
+          <p className="text-xs font-light text-white mt-1 select-none">Hiring Platform</p>
         </div>
 
         {/* Navigation */}
@@ -63,11 +63,11 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
                 key={label}
                 href={href}
                 className={`group flex items-center rounded-md px-4 py-3 text-sm font-medium select-none
-                  ${isActive ? 'bg-[#314939] text-white' : 'hover:bg-[#314939] text-white'}
+                  ${isActive ? 'bg-blue-600 text-white' : 'hover:bg-blue-400 text-white'}
                 `}
               >
                 <Icon
-                  className={`mr-3 h-6 w-6 ${isActive ? 'text-[#accba7]' : 'text-white group-hover:text-[#accba7]'}`}
+                  className={`mr-3 h-6 w-6 ${isActive ? 'text-white' : 'text-white group-hover:text-white'}`}
                   aria-hidden="true"
                 />
                 <span>{label}</span>
@@ -80,7 +80,7 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
         <div className="px-6 pb-6 mt-auto select-none">
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-[#314939] px-3 py-2 font-semibold text-white hover:bg-[#253224] active:bg-[#1e2a1d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#253224]"
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-red-600 px-3 py-2 font-semibold text-white hover:bg-red-700 active:bg-red-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600"
             onClick={() => setShowModal(true)}
           >
             <ArrowLeftIcon className="h-5 w-5" aria-hidden="true" />

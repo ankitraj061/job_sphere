@@ -58,13 +58,20 @@ function EmployerProfileUpdateForm({
     setLoading(true);
 
     try {
-      const res = await axios.put(
-        `${backendUrl}/api/employer/profile`,
-        formData,
-        {
-          withCredentials: true,
-        }
-      );
+      const payload = {
+        user: {
+          name: formData.name,
+          phone: formData.phone,
+          location: formData.location,
+          profilePicture: formData.profilePicture,
+        },
+        jobTitle: formData.jobTitle,
+        department: formData.department,
+      };
+
+      const res = await axios.put(`${backendUrl}/api/employer/profile`, payload, {
+        withCredentials: true,
+      });
 
       if (res.data.success) {
         onSuccess(res.data.data);
@@ -83,104 +90,116 @@ function EmployerProfileUpdateForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-6 rounded-2xl border border-green-700 bg-green-950 shadow-xl space-y-4"
+      className="p-6 rounded-3xl border border-indigo-300 bg-white shadow-md space-y-6"
     >
-      <h3 className="text-xl font-semibold text-emerald-200 mb-4">
+      <h3 className="text-2xl font-bold text-indigo-700 mb-4 flex items-center gap-2">
         ✏️ Update Profile
       </h3>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-2 gap-6">
         {/* Name */}
         <div className="flex flex-col">
-          <label className="text-sm text-emerald-300 mb-1">Name</label>
+          <label className="text-sm text-indigo-600 mb-1">Name</label>
           <input
             type="text"
             name="name"
+            required
             value={formData.name}
             onChange={handleChange}
             placeholder="Name"
-            className="p-2 rounded bg-green-900 border border-green-600 text-green-100"
+            className="p-2 rounded-lg bg-white border border-indigo-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
 
         {/* Phone */}
         <div className="flex flex-col">
-          <label className="text-sm text-emerald-300 mb-1">Phone</label>
+          <label className="text-sm text-indigo-600 mb-1">Phone</label>
           <input
-            type="text"
+            type="tel"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
             placeholder="Phone"
-            className="p-2 rounded bg-green-900 border border-green-600 text-green-100"
+            className="p-2 rounded-lg bg-white border border-indigo-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
 
         {/* Location */}
         <div className="flex flex-col">
-          <label className="text-sm text-emerald-300 mb-1">Location</label>
+          <label className="text-sm text-indigo-600 mb-1">Location</label>
           <input
             type="text"
             name="location"
             value={formData.location}
             onChange={handleChange}
             placeholder="Location"
-            className="p-2 rounded bg-green-900 border border-green-600 text-green-100"
+            className="p-2 rounded-lg bg-white border border-indigo-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
 
         {/* Profile Picture */}
         <div className="flex flex-col">
-          <label className="text-sm text-emerald-300 mb-1">Profile Picture URL</label>
+          <label className="text-sm text-indigo-600 mb-1">
+            Profile Picture URL
+          </label>
           <input
-            type="text"
+            type="url"
             name="profilePicture"
             value={formData.profilePicture}
             onChange={handleChange}
             placeholder="Profile Picture URL"
-            className="p-2 rounded bg-green-900 border border-green-600 text-green-100"
+            className="p-2 rounded-lg bg-white border border-indigo-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
+          {formData.profilePicture && (
+            <img
+              src={formData.profilePicture}
+              alt="Preview"
+              className="mt-2 w-20 h-20 object-cover rounded-xl border border-indigo-200 shadow"
+            />
+          )}
         </div>
 
         {/* Job Title */}
         <div className="flex flex-col">
-          <label className="text-sm text-emerald-300 mb-1">Job Title</label>
+          <label className="text-sm text-indigo-600 mb-1">Job Title</label>
           <input
             type="text"
             name="jobTitle"
+            required
             value={formData.jobTitle}
             onChange={handleChange}
             placeholder="Job Title"
-            className="p-2 rounded bg-green-900 border border-green-600 text-green-100"
+            className="p-2 rounded-lg bg-white border border-indigo-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
 
         {/* Department */}
         <div className="flex flex-col">
-          <label className="text-sm text-emerald-300 mb-1">Department</label>
+          <label className="text-sm text-indigo-600 mb-1">Department</label>
           <input
             type="text"
             name="department"
             value={formData.department}
             onChange={handleChange}
             placeholder="Department"
-            className="p-2 rounded bg-green-900 border border-green-600 text-green-100"
+            className="p-2 rounded-lg bg-white border border-indigo-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
       </div>
 
+      {/* Buttons */}
       <div className="flex gap-4 justify-end mt-4">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500"
+          className="px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 disabled:opacity-50"
+          className="px-6 py-2 rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold shadow-md hover:from-indigo-500 hover:to-blue-500 transition disabled:opacity-50"
         >
           {loading ? "Saving..." : "Save Changes"}
         </button>
