@@ -1,7 +1,7 @@
 // components/profile/PreferencesSection.tsx
 'use client';
 import { useState } from 'react';
-import { Settings, Edit3, CheckCircle2, IndianRupee, MapPin, Briefcase, Clock, Home, Zap } from 'lucide-react';
+import { Settings, Edit3, CheckCircle2, IndianRupee, MapPin, Briefcase, Clock, Home, Zap, Lock, AlertCircle } from 'lucide-react';
 import { Preferences } from './types';
 import { updatePreferences } from './profileApi';
 import PreferencesModal from './PreferencesModel';
@@ -9,12 +9,18 @@ import { getJobTypeLabel, getJobRoleLabel } from './enumMappings';
 import { promiseToast } from './toasts';
 
 interface PreferencesSectionProps {
-  data: Preferences;
+  data: Preferences|null;
   onUpdate: () => void;
   isComplete: boolean;
+  canAccess: boolean;
 }
 
-const PreferencesSection: React.FC<PreferencesSectionProps> = ({ data, onUpdate, isComplete }) => {
+const PreferencesSection: React.FC<PreferencesSectionProps> = ({ 
+  data, 
+  onUpdate, 
+  isComplete, 
+  canAccess 
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleUpdate = async (formData: Omit<Preferences, "id" | "seekerId">) => {
@@ -41,6 +47,68 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ data, onUpdate,
     }).format(amount);
   };
 
+  const openPreferencesModal = () => {
+    if (!canAccess) return;
+    setIsModalOpen(true);
+  };
+
+  // If user can't access this section
+  if (!canAccess) {
+    return (
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden mb-8">
+        {/* Section Header */}
+        <div className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-gray-400 to-gray-500 rounded-xl shadow-lg">
+                <Settings className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-2xl font-bold text-gray-500">Preferences</h2>
+                  <div className="flex items-center space-x-1 bg-gray-100 px-3 py-1 rounded-full">
+                    <Lock className="w-4 h-4 text-gray-600" />
+                    <span className="text-xs font-medium text-gray-600">Locked</span>
+                  </div>
+                </div>
+                <p className="text-gray-500 text-sm mt-1">Complete your professional profile first to unlock this section</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Locked Content */}
+        <div className="p-8">
+          <div className="text-center py-16">
+            <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Lock className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Preferences Section Locked</h3>
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
+              Please create your professional profile (resume, LinkedIn, GitHub, and skills) first to access job preferences and career settings
+            </p>
+            <div className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-600 rounded-lg">
+              <AlertCircle className="w-4 h-4 mr-2" />
+              Professional Profile Required
+            </div>
+            
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl max-w-md mx-auto">
+              <div className="flex items-start space-x-3">
+                <Settings className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-left">
+                  <p className="text-sm font-medium text-blue-800 mb-1">Coming Soon</p>
+                  <p className="text-sm text-blue-700">
+                    Set your job preferences, salary expectations, and work arrangements to help employers find the perfect match.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Modern Section Container */}
@@ -61,17 +129,28 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ data, onUpdate,
                       <span className="text-xs font-medium text-green-700">Complete</span>
                     </div>
                   )}
+                  {canAccess && (
+                    <div className="flex items-center space-x-1 bg-blue-100 px-3 py-1 rounded-full">
+                      <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                      <span className="text-xs font-medium text-blue-700">Available</span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-gray-600 text-sm mt-1">Your job preferences and career aspirations</p>
               </div>
             </div>
             
             <button
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl hover:from-orange-700 hover:to-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+              onClick={openPreferencesModal}
+              disabled={!canAccess}
+              className={`inline-flex items-center px-6 py-3 rounded-xl font-medium shadow-lg transition-all duration-200 ${
+                canAccess
+                  ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white hover:from-orange-700 hover:to-red-700 hover:shadow-xl transform hover:scale-105'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
             >
               <Edit3 className="w-4 h-4 mr-2" />
-              Edit Preferences
+              {data ? 'Edit Preferences' : 'Set Preferences'}
             </button>
           </div>
         </div>
@@ -226,14 +305,38 @@ const PreferencesSection: React.FC<PreferencesSectionProps> = ({ data, onUpdate,
                 <Settings className="w-10 h-10 text-gray-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No Preferences Set</h3>
-              <p className="text-gray-600 mb-6">Set your job preferences to help employers find you</p>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                {canAccess 
+                  ? 'Set your job preferences, salary expectations, and work arrangements to help employers find the perfect match for your career goals'
+                  : 'Complete your professional profile first to set your job preferences'
+                }
+              </p>
               <button
-                onClick={() => setIsModalOpen(true)}
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl hover:from-orange-700 hover:to-red-700 transition-all duration-200 font-medium shadow-lg"
+                onClick={openPreferencesModal}
+                disabled={!canAccess}
+                className={`inline-flex items-center px-6 py-3 rounded-xl font-medium shadow-lg transition-all duration-200 ${
+                  canAccess
+                    ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white hover:from-orange-700 hover:to-red-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
               >
                 <Settings className="w-4 h-4 mr-2" />
-                Set Your Preferences
+                {canAccess ? 'Set Your Preferences' : 'Professional Profile Required'}
               </button>
+              
+              {!canAccess && (
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl max-w-md mx-auto">
+                  <div className="flex items-start space-x-3">
+                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-left">
+                      <p className="text-sm font-medium text-yellow-800 mb-1">Prerequisites</p>
+                      <p className="text-sm text-yellow-700">
+                        Create your professional profile with resume, LinkedIn, GitHub, and skills to unlock this section.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

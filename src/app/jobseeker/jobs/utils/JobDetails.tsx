@@ -400,6 +400,8 @@ export const JobDetail: React.FC<JobDetailProps> = ({ jobId }) => {
                 <div className="relative">
                   {job.company.profilePicture ? (
                     <Image
+                      width={96}
+                      height={96}
                       src={job.company.profilePicture}
                       alt={job.company.name}
                       className="w-24 h-24 rounded-2xl shadow-lg object-cover ring-4 ring-blue-500/20"

@@ -7,8 +7,9 @@ import { updateBasicDetails } from './profileApi';
 import BasicDetailsModal from './BasicDetailsModel';
 import { promiseToast } from './toasts';
 
+
 interface BasicDetailsSectionProps {
-  data: UserType;
+  data: UserType | null;
   onUpdate: () => void;
   isComplete: boolean;
 }
@@ -17,7 +18,7 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({ data, onUpdat
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const handleUpdate = async (formData: any) => {
+  const handleUpdate = async (formData: UserType) => {
     const updatePromise = updateBasicDetails(formData);
     
     promiseToast(updatePromise, {

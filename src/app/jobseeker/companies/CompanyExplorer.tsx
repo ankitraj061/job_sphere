@@ -1,19 +1,26 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Globe, Building2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Search, MapPin, Globe, Building2, AlertCircle, RefreshCw, Briefcase, Users, ExternalLink, Eye } from 'lucide-react';
 import axios from 'axios';
 import Image from 'next/image';
 import { toast } from 'sonner';
 
-// Type definitions
+// Updated type definitions to match new API response
+interface JobListing {
+  title: string;
+}
+
 interface Company {
   id: number;
   name: string;
   industry: string;
   location: string;
-  website?: string;
-  profilePicture?: string;
+  website?: string | null;
+  profilePicture?: string | null;
   description?: string;
+  jobs: JobListing[];
+  activeJobCount: number;
+  activeJobTitles: string[];
 }
 
 interface ApiResponse {
@@ -90,7 +97,8 @@ const CompaniesExplorer: React.FC = () => {
           company.name?.toLowerCase().includes(searchLower) ||
           company.industry?.toLowerCase().includes(searchLower) ||
           company.location?.toLowerCase().includes(searchLower) ||
-          company.description?.toLowerCase().includes(searchLower)
+          company.description?.toLowerCase().includes(searchLower) ||
+          company.activeJobTitles?.some(title => title.toLowerCase().includes(searchLower))
         );
       });
       setFilteredCompanies(filtered);
@@ -124,21 +132,27 @@ const CompaniesExplorer: React.FC = () => {
     return gradients[index];
   };
 
+  // Get unique job titles for display
+  const getUniqueJobTitles = (titles: string[]) => {
+    const unique = [...new Set(titles)];
+    return unique.slice(0, 3); // Show max 3 unique titles
+  };
+
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-xl border border-red-100 p-8 max-w-md w-full">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-6">
+        <div className="bg-white shadow-2xl rounded-3xl p-8 max-w-md w-full">
           <div className="text-center">
-            <div className="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4">
-              <AlertCircle className="w-6 h-6 text-red-600" />
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Unable to Load Companies</h3>
-            <p className="text-gray-600 text-sm mb-6">{error}</p>
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">Unable to Load Companies</h3>
+            <p className="text-gray-600 mb-6">{error}</p>
             <button 
               onClick={() => window.location.reload()}
-              className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all duration-200 font-medium text-sm shadow-lg hover:shadow-xl"
+              className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <RefreshCw className="w-4 h-4 mr-2 inline" />
               Try Again
             </button>
           </div>
@@ -148,32 +162,40 @@ const CompaniesExplorer: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       {/* Modern Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
-              <Building2 className="w-8 h-8 text-white" />
+      <div className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-10 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header Section */}
+          <div className="bg-white shadow-2xl rounded-3xl p-8 mb-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200 to-indigo-200 rounded-full -translate-y-16 translate-x-16 opacity-60"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-200 to-pink-200 rounded-full translate-y-12 -translate-x-12 opacity-40"></div>
+            
+            <div className="relative">
+              <div className="flex items-center space-x-4 mb-6">
+                <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                  <Building2 className="w-10 h-10 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                    Company Explorer
+                  </h1>
+                  <p className="text-gray-600 text-lg">Discover amazing companies and career opportunities</p>
+                </div>
+              </div>
+              
+              <div className="relative max-w-lg">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search companies, industries, locations, or job titles..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-500 shadow-lg"
+                  disabled={loading}
+                />
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                Company Explorer
-              </h1>
-              <p className="text-gray-600 mt-1">Discover amazing companies and career opportunities</p>
-            </div>
-          </div>
-          
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search companies, industries, locations..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-white/80 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-500"
-              disabled={loading}
-            />
           </div>
         </div>
       </div>
@@ -182,83 +204,126 @@ const CompaniesExplorer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {filteredCompanies.length === 0 ? (
           <div className="text-center py-16">
-            <div className="bg-white/60 rounded-2xl p-8 max-w-md mx-auto">
-              <Search className="mx-auto mb-4 text-gray-400" size={48} />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No companies found</h3>
-              <p className="text-gray-500 text-sm">
-                {searchTerm ? 'Try adjusting your search terms' : 'No companies available at the moment'}
-              </p>
+            <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Search className="w-10 h-10 text-gray-400" />
             </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No companies found</h3>
+            <p className="text-gray-600">
+              {searchTerm ? 'Try adjusting your search terms' : 'No companies available at the moment'}
+            </p>
           </div>
         ) : (
           <>
-            <div className="mb-6">
-              <p className="text-gray-600">
-                Showing <span className="font-semibold text-blue-600">{filteredCompanies.length}</span> {filteredCompanies.length === 1 ? 'company' : 'companies'}
-              </p>
+            <div className="mb-8">
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 inline-block">
+                <p className="text-gray-700 font-medium">
+                  Showing <span className="text-blue-600 font-bold">{filteredCompanies.length}</span> {filteredCompanies.length === 1 ? 'company' : 'companies'}
+                  {searchTerm && (
+                    <span className="text-gray-500 ml-2">
+                      for &quot;{searchTerm}&quot;
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
             
-            {/* Fixed Height Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Companies Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredCompanies.map((company) => (
                 <div
                   key={company.id}
-                  className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 p-6 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
+                  className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-2 flex flex-col"
                 >
-                  {/* Company Header - Fixed Height */}
-                  <div className="flex items-start space-x-4 mb-4 flex-shrink-0">
-                    <div className="flex-shrink-0">
-                      {company.profilePicture ? (
-                        <Image
-                          src={company.profilePicture}
-                          alt={company.name}
-                          className="w-14 h-14 rounded-xl object-cover ring-2 ring-blue-100"
-                          width={56}
-                          height={56}
-                        />
-                      ) : (
-                        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getGradientClass(company.name)} flex items-center justify-center ring-2 ring-white shadow-lg`}>
-                          <span className="text-white font-bold text-lg">
-                            {getInitials(company.name)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-xl text-gray-900 truncate mb-1">
-                        {company.name}
-                      </h3>
-                      <p className="text-blue-600 font-medium text-sm bg-blue-50 px-2 py-1 rounded-lg inline-block">
-                        {company.industry}
-                      </p>
+                  {/* Company Header */}
+                  <div className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 p-6">
+                    <div className="flex items-start space-x-4">
+                      <div className="flex-shrink-0">
+                        {company.profilePicture ? (
+                          <Image
+                            src={company.profilePicture}
+                            alt={company.name}
+                            className="w-16 h-16 rounded-xl object-cover ring-4 ring-blue-100 shadow-lg"
+                            width={64}
+                            height={64}
+                          />
+                        ) : (
+                          <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getGradientClass(company.name)} flex items-center justify-center ring-4 ring-white shadow-lg`}>
+                            <span className="text-white font-bold text-xl">
+                              {getInitials(company.name)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-xl text-gray-900 mb-2 line-clamp-2">
+                          {company.name}
+                        </h3>
+                        <span className="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                          {company.industry}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Company Details - Flexible Height */}
-                  <div className="flex-grow space-y-3 mb-4">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <MapPin size={16} className="flex-shrink-0" />
-                      <span className="text-sm truncate">{company.location}</span>
+                  {/* Company Details */}
+                  <div className="p-6 flex-grow">
+                    {/* Location and Website */}
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center space-x-3">
+                        <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                        <span className="text-gray-700 font-medium">{company.location}</span>
+                      </div>
+                      
+                      {company.website && (
+                        <div className="flex items-center space-x-3">
+                          <Globe className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                          <a
+                            href={company.website.startsWith('http') ? company.website : `https://${company.website}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 transition-colors font-medium text-sm flex items-center"
+                          >
+                            Visit Website
+                            <ExternalLink className="w-3 h-3 ml-1" />
+                          </a>
+                        </div>
+                      )}
                     </div>
-                    
-                    {company.website && (
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <Globe size={16} className="flex-shrink-0" />
-                        <a
-                          href={company.website.startsWith('http') ? company.website : `https://${company.website}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 transition-colors truncate"
-                        >
-                          Visit Website
-                        </a>
+
+                    {/* Job Statistics */}
+                    {company.activeJobCount > 0 && (
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200 mb-4">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <Briefcase className="w-4 h-4 text-green-600" />
+                          <span className="text-green-800 font-semibold text-sm">
+                            {company.activeJobCount} Active {company.activeJobCount === 1 ? 'Job' : 'Jobs'}
+                          </span>
+                        </div>
+                        
+                        {company.activeJobTitles.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {getUniqueJobTitles(company.activeJobTitles).map((title, index) => (
+                              <span 
+                                key={index}
+                                className="inline-flex items-center bg-white/80 text-green-800 px-2 py-1 rounded-full text-xs font-medium border border-green-200"
+                              >
+                                {title}
+                              </span>
+                            ))}
+                            {company.activeJobTitles.length > 3 && (
+                              <span className="inline-flex items-center bg-white/80 text-green-700 px-2 py-1 rounded-full text-xs font-medium border border-green-200">
+                                +{company.activeJobTitles.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
 
                     {/* Description */}
                     {company.description && (
-                      <div className="mt-3">
+                      <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4">
                         <p className="text-gray-700 text-sm leading-relaxed line-clamp-3">
                           {company.description}
                         </p>
@@ -266,13 +331,23 @@ const CompaniesExplorer: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Action Button - Always at Bottom */}
-                  <div className="mt-auto pt-4 border-t border-gray-100 flex-shrink-0">
+                  {/* Action Button */}
+                  <div className="p-6 pt-0">
                     <button 
-                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      className={`w-full py-3 px-4 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 ${
+                        company.activeJobCount > 0
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700'
+                          : 'bg-gradient-to-r from-gray-500 to-gray-600 text-white hover:from-gray-600 hover:to-gray-700'
+                      }`}
                       disabled={loading}
                     >
-                      View Jobs
+                      <Eye className="w-4 h-4" />
+                      <span>
+                        {company.activeJobCount > 0 
+                          ? `View ${company.activeJobCount} ${company.activeJobCount === 1 ? 'Job' : 'Jobs'}`
+                          : 'View Company'
+                        }
+                      </span>
                     </button>
                   </div>
                 </div>

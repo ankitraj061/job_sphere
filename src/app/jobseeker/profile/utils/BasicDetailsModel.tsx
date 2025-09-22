@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { User } from './types';
 
+
 interface BasicDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: User) => void;
   data: User | null;
   loading: boolean;
 }
@@ -37,10 +38,16 @@ const BasicDetailsModal: React.FC<BasicDetailsModalProps> = ({
   }, [data]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
+  e.preventDefault();
+  onSubmit({
+    id: data?.id || 0,
+    email: data?.email || '',
+    name: formData.name,
+    phone: formData.phone,
+    location: formData.location,
+    profilePicture: formData.profilePicture
+  });
+};
   if (!isOpen) return null;
 
   return (

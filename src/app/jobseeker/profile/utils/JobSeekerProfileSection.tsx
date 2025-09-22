@@ -1,27 +1,36 @@
 // components/profile/JobSeekerProfileSection.tsx
 'use client';
 import { useState } from 'react';
-import { FileText, Github, Linkedin, Zap, Edit3, CheckCircle2, ExternalLink, User, AlertCircle } from 'lucide-react';
-import { updateJobSeekerProfile } from './profileApi';
+import { FileText, Github, Linkedin, Zap, Edit3, CheckCircle2, ExternalLink, User, AlertCircle, Lock, Plus } from 'lucide-react';
+import { saveJobSeekerProfile } from './profileApi';
 import JobSeekerProfileModal from './JobSeekerProfileModel';
 import { promiseToast } from './toasts';
+import { JobSeekerProfileFormData } from './types';
 
 interface JobSeekerProfileSectionProps {
-  data: any;
+  data: JobSeekerProfileFormData | null;
   onUpdate: () => void;
   isComplete: boolean;
+  profileExists: boolean;
+  canAccess: boolean;
 }
 
-const JobSeekerProfileSection: React.FC<JobSeekerProfileSectionProps> = ({ data, onUpdate, isComplete }) => {
+const JobSeekerProfileSection: React.FC<JobSeekerProfileSectionProps> = ({ 
+  data, 
+  onUpdate, 
+  isComplete, 
+  profileExists, 
+  canAccess 
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleUpdate = async (formData: any) => {
-    const updatePromise = updateJobSeekerProfile(formData);
+  const handleSave = async (formData: JobSeekerProfileFormData) => {
+    const savePromise = saveJobSeekerProfile(formData, profileExists);
     
-    promiseToast(updatePromise, {
-      loading: 'Updating profile...',
-      success: 'Profile updated successfully! 👤',
-      error: 'Failed to update profile'
+    promiseToast(savePromise, {
+      loading: profileExists ? 'Updating profile...' : 'Creating profile...',
+      success: profileExists ? 'Profile updated successfully! 👤' : 'Profile created successfully! 🎉',
+      error: profileExists ? 'Failed to update profile' : 'Failed to create profile'
     }).unwrap().then(() => {
       onUpdate();
       setIsModalOpen(false);
@@ -29,6 +38,49 @@ const JobSeekerProfileSection: React.FC<JobSeekerProfileSectionProps> = ({ data,
       // Error handled by promiseToast
     });
   };
+
+  // If user can't access this section
+  if (!canAccess) {
+    return (
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden mb-8">
+        {/* Section Header */}
+        <div className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-gray-400 to-gray-500 rounded-xl shadow-lg">
+                <User className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-2xl font-bold text-gray-500">Job Profile</h2>
+                  <div className="flex items-center space-x-1 bg-gray-100 px-3 py-1 rounded-full">
+                    <Lock className="w-4 h-4 text-gray-600" />
+                    <span className="text-xs font-medium text-gray-600">Locked</span>
+                  </div>
+                </div>
+                <p className="text-gray-500 text-sm mt-1">Complete your basic details first to unlock this section</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Locked Content */}
+        <div className="p-8">
+          <div className="text-center py-16">
+            <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Lock className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Section Locked</h3>
+            <p className="text-gray-500 mb-6">Please complete your basic details first to access your professional profile section</p>
+            <div className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-600 rounded-lg">
+              <AlertCircle className="w-4 h-4 mr-2" />
+              Complete Basic Details Required
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -50,6 +102,12 @@ const JobSeekerProfileSection: React.FC<JobSeekerProfileSectionProps> = ({ data,
                       <span className="text-xs font-medium text-green-700">Complete</span>
                     </div>
                   )}
+                  {!profileExists && (
+                    <div className="flex items-center space-x-1 bg-yellow-100 px-3 py-1 rounded-full">
+                      <Plus className="w-4 h-4 text-yellow-600" />
+                      <span className="text-xs font-medium text-yellow-700">New</span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-gray-600 text-sm mt-1">Your professional links and skills showcase</p>
               </div>
@@ -59,15 +117,24 @@ const JobSeekerProfileSection: React.FC<JobSeekerProfileSectionProps> = ({ data,
               onClick={() => setIsModalOpen(true)}
               className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              <Edit3 className="w-4 h-4 mr-2" />
-              Edit Profile
+              {profileExists ? (
+                <>
+                  <Edit3 className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Profile
+                </>
+              )}
             </button>
           </div>
         </div>
 
         {/* Section Content */}
         <div className="p-8">
-          {data ? (
+          {profileExists && data ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Professional Links Column */}
               <div className="space-y-6">
@@ -204,15 +271,36 @@ const JobSeekerProfileSection: React.FC<JobSeekerProfileSectionProps> = ({ data,
               <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <User className="w-10 h-10 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Profile Information</h3>
-              <p className="text-gray-600 mb-6">Please add your professional links and skills to complete your profile</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {profileExists ? 'No Profile Information' : 'Create Your Professional Profile'}
+              </h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                {profileExists 
+                  ? 'Please add your professional links and skills to complete your profile'
+                  : 'Add your resume, LinkedIn, GitHub, and skills to create your professional profile and unlock additional sections'
+                }
+              </p>
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg"
               >
-                <User className="w-4 h-4 mr-2" />
-                Add Profile Details
+                <Plus className="w-4 h-4 mr-2" />
+                {profileExists ? 'Add Profile Details' : 'Create Professional Profile'}
               </button>
+              
+              {!profileExists && (
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl max-w-md mx-auto">
+                  <div className="flex items-start space-x-3">
+                    <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-left">
+                      <p className="text-sm font-medium text-blue-800 mb-1">Next Step</p>
+                      <p className="text-sm text-blue-700">
+                        Creating your professional profile will unlock the Education, Experience, Projects, and Preferences sections.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -221,9 +309,10 @@ const JobSeekerProfileSection: React.FC<JobSeekerProfileSectionProps> = ({ data,
       <JobSeekerProfileModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={handleUpdate}
+        onSubmit={handleSave}
         data={data}
         loading={false}
+        isCreating={!profileExists}
       />
     </>
   );
