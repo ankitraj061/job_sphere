@@ -427,8 +427,10 @@
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className="bg-white/90 backdrop-blur-sm border border-white/30 rounded-2xl shadow-xl p-6 grid grid-cols-1 md:grid-cols-3 gap-8 hover:shadow-2xl transition-all relative"
-              >
+                  className={`bg-white/90 backdrop-blur-sm border border-white/30 rounded-2xl shadow-xl p-6 grid grid-cols-1 md:grid-cols-3 gap-8 hover:shadow-2xl transition-all ${
+                    dropdownOpen === job.id ? 'relative z-50' : 'relative'
+                  }`}
+                >
                 <div className="md:col-span-2">
                   <h2 className="text-xl font-bold text-gray-900 mb-1">{job.title}</h2>
                   <div className="flex flex-wrap gap-4 text-gray-500 text-sm mb-2">
@@ -469,15 +471,15 @@
                 </div>
 
                 {/* Actions Dropdown */}
-                <div className="flex flex-col gap-2 items-end justify-start relative z-100">
+                <div className="flex flex-col gap-2 items-end justify-start">
                   <button
                     onClick={() => toggleDropdown(job.id)}
-                    className="p-2 rounded-full hover:bg-blue-50 transition"
+                    className="p-2 rounded-full hover:bg-blue-50 transition relative z-10"
                   >
                     <FiMoreVertical className="w-6 h-6 text-gray-700" />
                   </button>
                   {dropdownOpen === job.id && (
-                    <div className="absolute right-0 top-12 w-56 bg-white/95 border border-blue-100 rounded-xl shadow-2xl z-50 overflow-hidden">
+                    <div className="absolute right-0 top-12 w-56 bg-white/95 border border-blue-100 rounded-xl shadow-2xl z-[60] overflow-hidden">
                       <ul className="text-sm text-gray-700 divide-y">
                         <li
                           className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-blue-50 transition"

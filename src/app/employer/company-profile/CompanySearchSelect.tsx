@@ -15,20 +15,24 @@ export default function CompanySearchSelect({ onCancel, onSelect }: CompanySearc
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const fetchCompanies = async (query = '') => {
-    setLoading(true);
-    try {
-      const res = await axios.get(
-        `${backendUrl}/api/employer/companies/search?query=${encodeURIComponent(query)}`
-      );
-      setCompanies(res.data.data || []);
-    } catch (err) {
-      console.error(err);
-      setCompanies([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+ const fetchCompanies = async (query = '') => {
+  setLoading(true);
+  try {
+    const res = await axios.get(
+      `${backendUrl}/api/employer/companies/search?q=${encodeURIComponent(query)}`
+    );
+
+    // FIX: use res.data.companies instead of res.data.data
+    setCompanies(res.data.data.companies || []);
+    console.log('Companies : ',res.data.data.companies);
+  } catch (err) {
+    console.error(err);
+    setCompanies([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchCompanies();
