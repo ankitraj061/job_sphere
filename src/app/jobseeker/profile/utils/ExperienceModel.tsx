@@ -1,12 +1,12 @@
 // components/profile/modals/ExperienceModal.tsx
 'use client';
 import { useState, useEffect } from 'react';
-import { Experience } from './types';
+import { Experience, ExperienceFormData } from './types';
 
 interface ExperienceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: ExperienceFormData) => void;
   data: Experience | null;
   loading: boolean;
 }
@@ -63,7 +63,7 @@ const ExperienceModal: React.FC<ExperienceModalProps> = ({
     e.preventDefault();
     
     // Base submission data
-    const submissionData: any = {
+    const submissionData: ExperienceFormData = {
       company: formData.company,
       position: formData.position,
       startDate: formatDateToISO(formData.startDate),

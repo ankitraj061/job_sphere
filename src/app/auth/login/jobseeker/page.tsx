@@ -4,7 +4,9 @@ import { Eye, EyeOff, User, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ;
 export default function Auth() {
     const { login, signup } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
@@ -45,7 +47,20 @@ export default function Auth() {
         await login(loginData.email, loginData.password);
         
         toast.success('Logged in successfully!');
-        router.push('/jobseeker');
+        const res = await axios.get(`${backendUrl}/api/jobseeker/profile-status`, {
+  withCredentials: true
+});
+
+if (!res.data.data.profileStatus.jobSeekerProfile) {
+  router.push('/jobseeker/profile');
+}
+else{
+router.push('/jobseeker');
+}
+
+
+
+        
     } catch (error) {
       console.error('Login error:', error);
     } finally {

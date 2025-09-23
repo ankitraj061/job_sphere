@@ -1,30 +1,37 @@
 // components/profile/ExperienceSection.tsx
 'use client';
 import { useState } from 'react';
-import { Briefcase, Plus, Edit3, Trash2, CheckCircle2, Calendar, MapPin, Clock, Building2 } from 'lucide-react';
-import { Experience } from './types';
+import { Briefcase, Plus, Edit3, Trash2, CheckCircle2, Calendar, MapPin, Clock, Building2, Lock, AlertCircle } from 'lucide-react';
+import { Experience , ExperienceFormData} from './types';
 import { addExperience, updateExperience, deleteExperience } from './profileApi';
 import ExperienceModal from './ExperienceModel';
 import { promiseToast, showActionToast } from './toasts';
+
 
 interface ExperienceSectionProps {
   data: Experience[];
   onUpdate: () => void;
   isComplete: boolean;
+  canAccess: boolean;
 }
 
-const ExperienceSection: React.FC<ExperienceSectionProps> = ({ data, onUpdate, isComplete }) => {
+const ExperienceSection: React.FC<ExperienceSectionProps> = ({ 
+  data, 
+  onUpdate, 
+  isComplete, 
+  canAccess 
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExperience, setEditingExperience] = useState<Experience | null>(null);
 
-  const handleAdd = async (formData: any) => {
+  const handleAdd = async (formData: ExperienceFormData) => {
     const addPromise = addExperience(formData);
     
     promiseToast(addPromise, {
       loading: 'Adding experience...',
       success: 'Work experience added successfully! 💼',
       error: 'Failed to add experience'
-    }).then(() => {
+    }).unwrap().then(() => {
       onUpdate();
       setIsModalOpen(false);
     }).catch(() => {
@@ -32,7 +39,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ data, onUpdate, i
     });
   };
 
-  const handleUpdate = async (formData: any) => {
+  const handleUpdate = async (formData: ExperienceFormData) => {
     if (!editingExperience) return;
     
     const updatePromise = updateExperience(editingExperience.id, formData);
@@ -41,7 +48,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ data, onUpdate, i
       loading: 'Updating experience...',
       success: 'Work experience updated successfully! ✅',
       error: 'Failed to update experience'
-    }).then(() => {
+    }).unwrap().then(() => {
       onUpdate();
       setIsModalOpen(false);
       setEditingExperience(null);
@@ -60,7 +67,7 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ data, onUpdate, i
           loading: 'Deleting experience...',
           success: 'Experience deleted successfully! 🗑️',
           error: 'Failed to delete experience'
-        }).then(() => {
+        }).unwrap().then(() => {
           onUpdate();
         }).catch(() => {
           // Error handled by promiseToast
@@ -71,11 +78,13 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ data, onUpdate, i
   };
 
   const openAddModal = () => {
+    if (!canAccess) return;
     setEditingExperience(null);
     setIsModalOpen(true);
   };
 
   const openEditModal = (experience: Experience) => {
+    if (!canAccess) return;
     setEditingExperience(experience);
     setIsModalOpen(true);
   };
@@ -86,6 +95,51 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ data, onUpdate, i
       month: 'short' 
     });
   };
+
+  // If user can't access this section
+  if (!canAccess) {
+    return (
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden mb-8">
+        {/* Section Header */}
+        <div className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-gray-400 to-gray-500 rounded-xl shadow-lg">
+                <Briefcase className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-2xl font-bold text-gray-500">Experience</h2>
+                  <div className="flex items-center space-x-1 bg-gray-100 px-3 py-1 rounded-full">
+                    <Lock className="w-4 h-4 text-gray-600" />
+                    <span className="text-xs font-medium text-gray-600">Locked</span>
+                  </div>
+                </div>
+                <p className="text-gray-500 text-sm mt-1">Complete your professional profile first to unlock this section</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Locked Content */}
+        <div className="p-8">
+          <div className="text-center py-16">
+            <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Lock className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Experience Section Locked</h3>
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
+              Please create your professional profile (resume, LinkedIn, GitHub, and skills) first to access the work experience section
+            </p>
+            <div className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-600 rounded-lg">
+              <AlertCircle className="w-4 h-4 mr-2" />
+              Professional Profile Required
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -107,6 +161,12 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ data, onUpdate, i
                       <span className="text-xs font-medium text-green-700">Complete</span>
                     </div>
                   )}
+                  {canAccess && (
+                    <div className="flex items-center space-x-1 bg-blue-100 px-3 py-1 rounded-full">
+                      <CheckCircle2 className="w-4 h-4 text-blue-600" />
+                      <span className="text-xs font-medium text-blue-700">Available</span>
+                    </div>
+                  )}
                 </div>
                 <p className="text-gray-600 text-sm mt-1">Your professional work experience and career journey</p>
               </div>
@@ -114,7 +174,12 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ data, onUpdate, i
             
             <button
               onClick={openAddModal}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-xl hover:from-cyan-700 hover:to-teal-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+              disabled={!canAccess}
+              className={`inline-flex items-center px-6 py-3 rounded-xl font-medium shadow-lg transition-all duration-200 ${
+                canAccess
+                  ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white hover:from-cyan-700 hover:to-teal-700 hover:shadow-xl transform hover:scale-105'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Experience
@@ -182,14 +247,24 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ data, onUpdate, i
                     <div className="flex flex-col space-y-2 ml-4">
                       <button
                         onClick={() => openEditModal(experience)}
-                        className="inline-flex items-center px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium shadow-sm"
+                        disabled={!canAccess}
+                        className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors ${
+                          canAccess
+                            ? 'bg-blue-500 text-white hover:bg-blue-600'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
                       >
                         <Edit3 className="w-3 h-3 mr-1" />
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(experience.id)}
-                        className="inline-flex items-center px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium shadow-sm"
+                        disabled={!canAccess}
+                        className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors ${
+                          canAccess
+                            ? 'bg-red-500 text-white hover:bg-red-600'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
                       >
                         <Trash2 className="w-3 h-3 mr-1" />
                         Delete
@@ -205,14 +280,38 @@ const ExperienceSection: React.FC<ExperienceSectionProps> = ({ data, onUpdate, i
                 <Briefcase className="w-10 h-10 text-gray-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No Work Experience Added</h3>
-              <p className="text-gray-600 mb-6">Add your professional experience to showcase your career journey</p>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                {canAccess 
+                  ? 'Add your professional work experience to showcase your career journey and achievements'
+                  : 'Complete your professional profile first to add work experience details'
+                }
+              </p>
               <button
                 onClick={openAddModal}
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-xl hover:from-cyan-700 hover:to-teal-700 transition-all duration-200 font-medium shadow-lg"
+                disabled={!canAccess}
+                className={`inline-flex items-center px-6 py-3 rounded-xl font-medium shadow-lg transition-all duration-200 ${
+                  canAccess
+                    ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white hover:from-cyan-700 hover:to-teal-700'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
               >
                 <Briefcase className="w-4 h-4 mr-2" />
-                Add Your First Experience
+                {canAccess ? 'Add Your First Experience' : 'Professional Profile Required'}
               </button>
+              
+              {!canAccess && (
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl max-w-md mx-auto">
+                  <div className="flex items-start space-x-3">
+                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-left">
+                      <p className="text-sm font-medium text-yellow-800 mb-1">Prerequisites</p>
+                      <p className="text-sm text-yellow-700">
+                        Create your professional profile with resume, LinkedIn, GitHub, and skills to unlock this section.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

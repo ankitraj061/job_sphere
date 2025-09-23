@@ -1,13 +1,13 @@
 // components/profile/modals/PreferencesModal.tsx
 'use client';
 import { useState, useEffect } from 'react';
-import { Preferences } from './types';
+import { Preferences, PreferencesFormData } from './types';
 import { JOB_TYPE_OPTIONS, JOB_ROLE_OPTIONS } from './enumMappings';
 
 interface PreferencesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: PreferencesFormData) => void;
   data: Preferences | null;
   loading: boolean;
 }

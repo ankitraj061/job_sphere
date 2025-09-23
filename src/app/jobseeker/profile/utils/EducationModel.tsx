@@ -1,12 +1,12 @@
 // components/profile/modals/EducationModal.tsx
 'use client';
 import { useState, useEffect } from 'react';
-import { Education } from './types';
+import { Education, EducationFormData } from './types';
 
 interface EducationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: EducationFormData) => void;
   data: Education | null;
   loading: boolean;
 }

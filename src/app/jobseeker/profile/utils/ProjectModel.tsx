@@ -1,13 +1,13 @@
 // components/profile/modals/ProjectModal.tsx
 'use client';
 import { useState, useEffect } from 'react';
-import { Project } from './types';
+import { Project, ProjectFormData } from './types';
 import { showErrorToast } from './toasts';
 
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: unknown) => void;
+  onSubmit: (data: ProjectFormData) => void;
   data: Project | null;
   loading: boolean;
 }
