@@ -1,6 +1,5 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
+import { Job, JobForm } from "./types";
 
 const JOB_TYPES = [
   { value: "FULL_TIME", label: "Full Time" },
@@ -42,23 +41,11 @@ const JOB_ROLES = [
   { value: "HR_MANAGER", label: "HR Manager" },
 ];
 
-interface JobForm {
-  title: string;
-  role: string;
-  description: string;
-  requirements: string;
-  location: string;
-  jobType: string;
-  salaryMin: number | "";
-  salaryMax: number | "";
-  openings: number | "";
-}
-
 interface JobCreateModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (form: JobForm) => void;
-  editingJob?: any | null;
+  editingJob?: Job | null;
 }
 
 export default function JobCreateModal({
@@ -76,7 +63,7 @@ export default function JobCreateModal({
     jobType: "FULL_TIME",
     salaryMin: "",
     salaryMax: "",
-    openings: "",
+    noOfOpenings: "", // Fixed: changed from 'openings' to 'noOfOpenings'
   });
 
   useEffect(() => {
@@ -90,7 +77,7 @@ export default function JobCreateModal({
         jobType: editingJob.jobType || "FULL_TIME",
         salaryMin: editingJob.salaryMin || "",
         salaryMax: editingJob.salaryMax || "",
-        openings: editingJob.noOfOpenings || "",
+        noOfOpenings: editingJob.noOfOpenings || "", // Fixed: changed from 'openings' to 'noOfOpenings'
       });
     } else {
       setForm({
@@ -102,7 +89,7 @@ export default function JobCreateModal({
         jobType: "FULL_TIME",
         salaryMin: "",
         salaryMax: "",
-        openings: "",
+        noOfOpenings: "", // Fixed: changed from 'openings' to 'noOfOpenings'
       });
     }
   }, [editingJob, open]);
@@ -215,8 +202,8 @@ export default function JobCreateModal({
           </div>
           <input
             type="number"
-            name="openings"
-            value={form.openings}
+            name="noOfOpenings" // Fixed: changed from 'openings' to 'noOfOpenings'
+            value={form.noOfOpenings}
             onChange={handleChange}
             placeholder="No of Openings"
             className="w-full px-3 py-2 border rounded-md"

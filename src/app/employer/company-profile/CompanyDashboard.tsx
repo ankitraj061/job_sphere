@@ -78,7 +78,7 @@ export default function CompanyDashboard() {
               <div className="px-12 py-12 bg-white/60 backdrop-blur-sm">
                 <div className="text-center mb-12">
                   <p className="text-2xl text-gray-700 mb-8 leading-relaxed">
-                    You haven't created a company profile yet. Choose one of the options below to get started.
+                    You haven&apos;t created a company profile yet. Choose one of the options below to get started.
                   </p>
                 </div>
 
@@ -114,7 +114,7 @@ export default function CompanyDashboard() {
                       </div>
                       <h3 className="text-2xl font-bold text-gray-900 mb-4">Join Existing Company</h3>
                       <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-                        Search for and join an existing company that's already registered on our platform.
+                        Search for and join an existing company that&apos;s already registered on our platform.
                       </p>
                       <button
                         className="w-full px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 font-bold text-lg transition-all duration-200 shadow-lg"
@@ -135,7 +135,7 @@ export default function CompanyDashboard() {
                     <h4 className="text-xl font-bold text-gray-900 mb-3">💡 Need Help?</h4>
                     <p className="text-gray-700">
                       Creating a company profile allows you to post jobs, manage applications, and build your employer brand.
-                      If you're joining an existing company, make sure you have the correct company name or details.
+                      If you&apos;re joining an existing company, make sure you have the correct company name or details.
                     </p>
                   </div>
                 </div>

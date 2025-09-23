@@ -6,23 +6,22 @@ import BasicDetailsForm from './BasicDetailsForm';
 import EmployerProfileForm from './EmployerProfileForm';
 import CompanySelection from './CompanySelection';
 import EmployerProfileView from './EmployerProfileView';
+import { ProfileStatus, EmployerProfile, ProfileStatusResponse, EmployerProfileResponse } from './types';
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function EmployerProfilePage() {
   const [loading, setLoading] = useState(true);
-  const [profileStatus, setProfileStatus] = useState<{
-    nextStep: string | null;
-  } | null>(null);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileStatus, setProfileStatus] = useState<ProfileStatus | null>(null);
+  const [profileData, setProfileData] = useState<EmployerProfile | null>(null);
   const [name, setName] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<string | null>(null);
 
   // Fetch profile status from API
-  const fetchProfileStatus = async () => {
+  const fetchProfileStatus = async (): Promise<ProfileStatus | null> => {
     try {
-      const res = await axios.get(
+      const res = await axios.get<ProfileStatusResponse>(
         `${backendUrl}/api/employer/profile-status`,
         { withCredentials: true }
       );
@@ -32,7 +31,7 @@ export default function EmployerProfilePage() {
       if (status.nextStep === 'complete') {
         await fetchProfile();
       }
-      return status; // ✅ return status
+      return status;
     } catch (error) {
       console.error('Failed to fetch profile status', error);
       return null;
@@ -42,9 +41,9 @@ export default function EmployerProfilePage() {
   };
 
   // Fetch full profile data for completed profiles
-  const fetchProfile = async () => {
+  const fetchProfile = async (): Promise<void> => {
     try {
-      const res = await axios.get(`${backendUrl}/api/employer/profile`, {
+      const res = await axios.get<EmployerProfileResponse>(`${backendUrl}/api/employer/profile`, {
         withCredentials: true,
       });
       setProfileData(res.data.data);
@@ -58,19 +57,19 @@ export default function EmployerProfilePage() {
   }, []);
 
   // Open modal at the given step
-  const openModalAtStep = (step: string) => {
+  const openModalAtStep = (step: string): void => {
     setCurrentStep(step);
     setModalOpen(true);
   };
 
   // Close modal completely
-  const closeModal = () => {
+  const closeModal = (): void => {
     setModalOpen(false);
   };
 
   // Called when a step form successfully completes
-  const onStepComplete = async () => {
-    const newStatus = await fetchProfileStatus(); // ✅ use return value
+  const onStepComplete = async (): Promise<void> => {
+    const newStatus = await fetchProfileStatus();
 
     if (newStatus?.nextStep === 'complete') {
       setModalOpen(false);

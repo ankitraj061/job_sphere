@@ -2,27 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import EmployerProfileUpdateForm from './EmployerProfileUpdateForm';
-
-interface EmployerProfile {
-  id: string;
-  user: {
-    name: string;
-    email: string;
-    phone?: string;
-    location?: string;
-    profilePicture?: string;
-  };
-  jobTitle?: string;
-  department?: string;
-  company?: {
-    name: string;
-    description?: string;
-    industry?: string;
-    location?: string;
-    website?: string;
-    profilePicture?: string;
-  } | null;
-}
+import { EmployerProfile } from './types';
 
 interface Props {
   profile: EmployerProfile | null;
@@ -110,6 +90,14 @@ export default function EmployerProfileView({ profile }: Props) {
                   <strong className="text-gray-900">Department:</strong>{' '}
                   {currentProfile.department ?? 'N/A'}
                 </p>
+                <p>
+                  <strong className="text-gray-900">Role:</strong>{' '}
+                  {currentProfile.role ?? 'N/A'}
+                </p>
+                <p>
+                  <strong className="text-gray-900">Total Jobs Posted:</strong>{' '}
+                  {currentProfile.totalJobsPosted ?? 0}
+                </p>
               </div>
             </section>
           </div>
@@ -124,6 +112,10 @@ export default function EmployerProfileView({ profile }: Props) {
                 <p>
                   <strong className="text-gray-900">Name:</strong>{' '}
                   {currentProfile.company.name}
+                </p>
+                <p>
+                  <strong className="text-gray-900">Description:</strong>{' '}
+                  {currentProfile.company.description ?? 'N/A'}
                 </p>
                 <p>
                   <strong className="text-gray-900">Industry:</strong>{' '}
@@ -147,6 +139,18 @@ export default function EmployerProfileView({ profile }: Props) {
                   ) : (
                     'N/A'
                   )}
+                </p>
+                <p>
+                  <strong className="text-gray-900">Company Size:</strong>{' '}
+                  {currentProfile.company.size ?? 'N/A'}
+                </p>
+                <p>
+                  <strong className="text-gray-900">Total Employees:</strong>{' '}
+                  {currentProfile.company.totalEmployees ?? 'N/A'}
+                </p>
+                <p>
+                  <strong className="text-gray-900">Active Jobs:</strong>{' '}
+                  {currentProfile.company.activeJobs ?? 0}
                 </p>
                 {currentProfile.company.profilePicture && (
                   <img

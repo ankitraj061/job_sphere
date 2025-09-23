@@ -20,7 +20,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 }) => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       onSearch();
     }
@@ -100,7 +100,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             <span>Filters applied:</span>
             {searchTerm && (
               <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded">
-                Search: "{searchTerm}"
+                Search: &quot;{searchTerm}&quot;
               </span>
             )}
             {statusFilter !== 'All Status' && (

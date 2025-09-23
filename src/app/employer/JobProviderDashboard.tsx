@@ -14,7 +14,9 @@ import {
   AlertCircle,
   Target,
   CheckCircle,
-  UserCheck
+  UserCheck,
+  Eye,
+  Calendar
 } from 'lucide-react';
 
 export const JobProviderDashboard: React.FC = () => {
@@ -42,15 +44,17 @@ export const JobProviderDashboard: React.FC = () => {
 
   if (!data) return null;
 
-  // Pie chart: Application status distribution
+  // Pie chart: Application status distribution with proper color mapping
   const candidateStatusData = data.applicationStats.statusDistribution.map(stat => ({
     label: stat.status,
     value: stat.count,
     color: stat.status === "ACCEPTED" ? "#10B981" :
            stat.status === "SHORTLISTED" ? "#8B5CF6" :
-           stat.status === "PENDING" ? "#F59E0B" :
+           stat.status === "INTERVIEWED" ? "#3B82F6" :
+           stat.status === "REVIEWING" ? "#F59E0B" :
+           stat.status === "PENDING" ? "#6B7280" :
            stat.status === "REJECTED" ? "#EF4444" :
-           "#3B82F6"
+           "#94A3B8"
   }));
 
   return (
@@ -80,39 +84,72 @@ export const JobProviderDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Stats Cards */}
       <div className="w-full overflow-x-auto">
-  <div className="min-w-[900px] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-    <StatCard
-      title="Total Jobs"
-      value={data.overview.totalJobs}
-      icon={<Briefcase className="w-4 h-4 text-blue-600" />}
-      // consider: glassmorphism and rounded styling inside StatCard
-    />
-    <StatCard
-      title="Active Jobs"
-      value={data.overview.activeJobs}
-      icon={<Briefcase className="w-6 h-6 text-green-600" />}
-    />
-    <StatCard
-      title="Applicants"
-      value={`${data.overview.totalApplicants} Total / ${data.overview.applicantsThisMonth} This month`}
-      icon={<Users className="w-6 h-6 text-purple-600" />}
-    />
-    <StatCard
-      title="Applications Status"
-      value={`${data.overview.shortlistedCandidates} Shortlist / ${data.overview.pendingApplications} Pending`}
-      icon={<UserCheck className="w-6 h-6 text-indigo-600" />}
-    />
-    <StatCard
-      title="Conversion Rate"
-      value={`${data.overview.conversionRate}%`}
-      icon={<Target className="w-6 h-6 text-orange-600" />}
-    />
-  </div>
-</div>
+        <div className="min-w-[1200px] grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+          <StatCard
+            title="Total Jobs"
+            value={data.overview.totalJobs}
+            icon={<Briefcase className="w-5 h-5 text-blue-600" />}
+          />
+          <StatCard
+            title="Active Jobs"
+            value={data.overview.activeJobs}
+            icon={<CheckCircle className="w-5 h-5 text-green-600" />}
+          />
+          <StatCard
+            title="Total Applicants"
+            value={data.overview.totalApplicants}
+            icon={<Users className="w-5 h-5 text-purple-600" />}
+          />
+          <StatCard
+            title="This Month"
+            value={data.overview.applicantsThisMonth}
+            icon={<Calendar className="w-5 h-5 text-indigo-600" />}
+          />
+          <StatCard
+            title="Shortlisted"
+            value={data.overview.shortlistedCandidates}
+            icon={<UserCheck className="w-5 h-5 text-emerald-600" />}
+          />
+          <StatCard
+            title="Pending Review"
+            value={data.overview.pendingApplications}
+            icon={<Clock className="w-5 h-5 text-orange-600" />}
+          />
+          <StatCard
+            title="Conversion Rate"
+            value={`${data.overview.conversionRate}%`}
+            icon={<Target className="w-5 h-5 text-red-600" />}
+          />
+        </div>
+      </div>
 
+      {/* Insights Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title="Avg Applications/Job"
+          value={data.insights.averageApplicationsPerJob}
+          icon={<TrendingUp className="w-5 h-5 text-blue-600" />}
+        />
+        <StatCard
+          title="Monthly Growth"
+          value={`${data.insights.monthlyGrowth}%`}
+          icon={<TrendingUp className="w-5 h-5 text-green-600" />}
+        />
+        <StatCard
+          title="Most Popular Role"
+          value={data.insights.mostPopularRole.replace('_', ' ')}
+          icon={<Target className="w-5 h-5 text-purple-600" />}
+        />
+        <StatCard
+          title="Response Rate"
+          value={`${data.insights.responseRate}%`}
+          icon={<Eye className="w-5 h-5 text-indigo-600" />}
+        />
+      </div>
 
-      {/* Application Status Distribution */}
+      {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <PieChart
           data={candidateStatusData}
@@ -129,14 +166,14 @@ export const JobProviderDashboard: React.FC = () => {
         />
       </div>
 
-      {/* Top Roles and Jobs */}
+      {/* Top Roles and Hiring Trends */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <BarChart
           data={data.analytics.topJobRoles.map(role => ({
-            label: role.role,
+            label: role.role.replace('_', ' '),
             value: role.totalApplications
           }))}
-          title="Top Job Roles"
+          title="Top Job Roles by Applications"
           color="#10B981"
         />
 
@@ -150,22 +187,69 @@ export const JobProviderDashboard: React.FC = () => {
         />
       </div>
 
+      {/* Top Performing Jobs */}
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800">Top Performing Jobs</h3>
+        </div>
+        <div className="p-6">
+          <div className="space-y-4">
+            {data.analytics.topPerformingJobs.slice(0, 5).map((job) => (
+              <div key={job.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">{job.title}</h4>
+                  <p className="text-sm text-gray-600">{job.role.replace('_', ' ')}</p>
+                  <p className="text-xs text-gray-500">{job.daysActive} days active</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-semibold text-blue-600">{job.applicationCount}</p>
+                  <p className="text-xs text-gray-500">applications</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Recent Activity */}
       <div className="bg-white rounded-lg shadow-sm border">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-800">Recent Applications</h3>
         </div>
         <div className="p-6 space-y-4">
-          {data.recentActivity.map((app: any) => (
+          {data.recentActivity.map((app) => (
             <div key={app.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-              <div className="p-2 rounded-full bg-gray-200">
-                <Users className="w-4 h-4 text-blue-600" />
+              <div className="flex-shrink-0">
+                {app.candidatePhoto ? (
+                  <img 
+                    src={app.candidatePhoto} 
+                    alt={app.candidateName}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                    <Users className="w-5 h-5 text-gray-600" />
+                  </div>
+                )}
               </div>
               <div className="flex-1">
-                <p className="text-sm text-gray-900">
-                  {app.candidateName} applied for {app.jobTitle} ({app.jobRole})
+                <p className="text-sm font-medium text-gray-900">{app.candidateName}</p>
+                <p className="text-sm text-gray-600">
+                  Applied for {app.jobTitle} • {app.jobRole.replace('_', ' ')}
                 </p>
                 <p className="text-xs text-gray-500">{app.timeAgo}</p>
+              </div>
+              <div className="flex-shrink-0">
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  app.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' :
+                  app.status === 'SHORTLISTED' ? 'bg-purple-100 text-purple-800' :
+                  app.status === 'INTERVIEWED' ? 'bg-blue-100 text-blue-800' :
+                  app.status === 'REVIEWING' ? 'bg-yellow-100 text-yellow-800' :
+                  app.status === 'PENDING' ? 'bg-gray-100 text-gray-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {app.status}
+                </span>
               </div>
             </div>
           ))}

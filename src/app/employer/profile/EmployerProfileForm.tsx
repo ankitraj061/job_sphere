@@ -1,13 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import { EmployerProfileFormData } from './types';
 
 interface Props {
   onComplete: () => void;
 }
 
-const roleOptions = [
+interface ApiResponse {
+  success: boolean;
+  message?: string;
+}
+
+const roleOptions: Array<{ label: string; value: EmployerProfileFormData['role'] }> = [
   { label: 'Admin', value: 'ADMIN' },
   { label: 'HR Manager', value: 'HR_MANAGER' },
   { label: 'Hiring Manager', value: 'HIRING_MANAGER' },
@@ -15,40 +21,46 @@ const roleOptions = [
 ];
 
 export default function EmployerProfileForm({ onComplete }: Props) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EmployerProfileFormData>({
     jobTitle: '',
     department: '',
-    role: '',
+    role: 'RECRUITER',
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    try {
-      const res = await axios.post(`${backendUrl}/api/employer/profile`, formData, {
-        withCredentials: true,
-      });
 
-      if (res.data.success) {
-        onComplete();
-      } else {
-        setError(res.data.message || 'Failed to update employer profile');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
+
+try {
+  const res = await axios.post<ApiResponse>(
+    `${backendUrl}/api/employer/profile`,
+    formData,
+    { withCredentials: true }
+  );
+
+  if (res.data.success) {
+    onComplete();
+  } else {
+    setError(res.data.message || 'Failed to update employer profile');
+  }
+} catch (err) {
+  const error = err as AxiosError<{ message: string }>; // type casting
+  setError(error.response?.data?.message || error.message || 'An error occurred');
+} finally {
+  setLoading(false);
+}
+
   };
 
   return (
@@ -107,9 +119,6 @@ export default function EmployerProfileForm({ onComplete }: Props) {
           required
           className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-500 focus:outline-none"
         >
-          <option value="" disabled>
-            Select role
-          </option>
           {roleOptions.map(({ label, value }) => (
             <option key={value} value={value}>
               {label}

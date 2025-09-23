@@ -1,16 +1,21 @@
-// app/employer/profile/BasicDetailsForm.tsx
 'use client';
 
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import { BasicDetailsUpdate } from './types';
 
 interface Props {
   onComplete: () => void;
   defaultName?: string;
 }
 
+interface ApiResponse {
+  success: boolean;
+  message?: string;
+}
+
 export default function BasicDetailsForm({ onComplete, defaultName = '' }: Props) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BasicDetailsUpdate>({
     name: defaultName,
     phone: '',
     location: '',
@@ -20,33 +25,34 @@ export default function BasicDetailsForm({ onComplete, defaultName = '' }: Props
   const [loading, setLoading] = useState(false);
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    try {
-      const res = await axios.put(
-        `${backendUrl}/api/employer/basic-details`,
-        formData,
-        { withCredentials: true }
-      );
+   try {
+  const res = await axios.put<ApiResponse>(
+    `${backendUrl}/api/employer/basic-details`,
+    formData,
+    { withCredentials: true }
+  );
 
-      if (res.data.success) {
-        onComplete();
-      } else {
-        setError(res.data.message || 'Failed to update basic details');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
+  if (res.data.success) {
+    onComplete();
+  } else {
+    setError(res.data.message || 'Failed to update basic details');
+  }
+} catch (err) {
+  const error = err as AxiosError<{ message: string }>; // type casting
+  setError(error.response?.data?.message || error.message || 'An error occurred');
+} finally {
+  setLoading(false);
+}
   };
 
   return (

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios,{AxiosError, AxiosResponse} from 'axios';
 import { useForm } from 'react-hook-form';
 
 interface Company {
@@ -291,19 +291,9 @@ function CompanyEditForm({
       } else {
         alert(res.data.message || 'Update failed');
       }
-    } catch (err: any) {
+    } catch (err: unknown ) {
       console.error('Error updating company:', err);
-      if (err.response?.data?.message) {
-        alert(err.response.data.message);
-      } else if (err.response?.status === 409) {
-        alert('A company with this name already exists');
-      } else if (err.response?.status === 403) {
-        alert('You do not have permission to update this company profile');
-      } else if (err.response?.status === 401) {
-        alert('Please log in to update company profile');
-      } else {
-        alert('Error updating company. Please try again.');
-      }
+      
     }
   };
 

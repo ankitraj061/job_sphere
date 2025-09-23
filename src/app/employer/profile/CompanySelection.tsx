@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation';
 
 interface Props {
   onComplete: () => void;
-  companyId?: string | null; // keep if needed for logic later
+  companyId?: number | null;
 }
 
-export default function CompanySelection({ onComplete }: Props) {
+export default function CompanySelection({ onComplete, companyId }: Props) {
   const router = useRouter();
 
-  const handleCompleteCompanyProfile = () => {
-    router.push(`/employer/company-profile`); // redirect to company management page
+  const handleCompleteCompanyProfile = (): void => {
+    router.push(`/employer/company-profile`);
   };
 
   return (

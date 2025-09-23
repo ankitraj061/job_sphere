@@ -3,6 +3,10 @@ import axios from 'axios';
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+interface Error{
+  message: string
+}
+
 export type Company = {
   id: string;
   name: string;
@@ -25,7 +29,7 @@ export type Company = {
 export function useMyCompany() {
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<Error>({ message: '' });
 
   useEffect(() => {
     async function fetchMyCompany() {
@@ -38,7 +42,7 @@ export function useMyCompany() {
           setCompany(null);
         }
       } catch (err) {
-        setError(err);
+        setError(err as Error);
       } finally {
         setLoading(false);
       }

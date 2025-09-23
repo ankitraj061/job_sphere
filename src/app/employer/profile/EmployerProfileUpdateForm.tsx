@@ -1,27 +1,9 @@
 import { useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
+import { EmployerProfile, Company } from "./types";
 
-interface EmployerProfile {
-  id: string;
-  user: {
-    name: string;
-    email: string;
-    phone?: string;
-    location?: string;
-    profilePicture?: string;
-  };
-  jobTitle?: string;
-  department?: string;
-  company?: {
-    name: string;
-    description?: string;
-    industry?: string;
-    location?: string;
-    website?: string;
-    profilePicture?: string;
-  } | null;
-}
+
 
 interface EmployerProfileUpdateFormProps {
   profile: EmployerProfile;
@@ -79,12 +61,12 @@ function EmployerProfileUpdateForm({
       } else {
         toast.error(res.data.message || "Failed to update profile");
       }
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) {
+  const error = err as AxiosError<{ message: string }>; // type casting
+  toast.error(error.response?.data?.message || error.message || 'An error occurred');
+} finally {
+  setLoading(false);
+}
   };
 
   return (

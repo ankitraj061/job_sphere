@@ -44,31 +44,92 @@ export interface EmployerApplication {
   id: number;
   applicantId: number;
   jobId: number;
-  status:
-    | "applied"
-    | "shortlisted"
-    | "interviewed"
-    | "accepted"
-    | "rejected"
-    | "withdrawn";
+  status: "applied" | "shortlisted" | "interviewed" | "accepted" | "rejected" | "withdrawn";
   appliedAt: string;
   updatedAt: string;
 }
 
-export interface EmployerStats {
+// Updated types based on complete API response
+export interface DashboardOverview {
   totalJobs: number;
   activeJobs: number;
   totalApplicants: number;
-  interviewsScheduled: number;
-  hiresMade: number;
+  applicantsThisMonth: number;
+  shortlistedCandidates: number;
+  pendingApplications: number;
+  conversionRate: number;
+}
+
+export interface ApplicationStatusDistribution {
+  status: "PENDING" | "REVIEWING" | "SHORTLISTED" | "INTERVIEWED" | "ACCEPTED" | "REJECTED";
+  count: number;
+  percentage: number;
+}
+
+export interface ApplicationStats {
+  statusDistribution: ApplicationStatusDistribution[];
+  totalApplications: number;
+}
+
+export interface RecentActivity {
+  id: number;
+  candidateName: string;
+  candidateEmail: string;
+  candidatePhoto: string | null;
+  jobTitle: string;
+  jobRole: string;
+  status: "PENDING" | "REVIEWING" | "SHORTLISTED" | "INTERVIEWED" | "ACCEPTED" | "REJECTED";
+  appliedAt: string;
+  timeAgo: string;
+}
+
+export interface ApplicationsOverTime {
+  month: string;
+  applications: number;
+  monthName: string;
+}
+
+export interface TopJobRole {
+  role: string;
+  totalApplications: number;
+  jobCount: number;
+}
+
+export interface TopPerformingJob {
+  id: number;
+  title: string;
+  role: string;
+  applicationCount: number;
+  createdAt: string;
+  daysActive: number;
+}
+
+export interface HiringTrend {
+  month: string;
+  hired: number;
+  monthName: string;
+}
+
+export interface Analytics {
+  applicationsOverTime: ApplicationsOverTime[];
+  topJobRoles: TopJobRole[];
+  topPerformingJobs: TopPerformingJob[];
+  hiringTrends: HiringTrend[];
+}
+
+export interface Insights {
+  averageApplicationsPerJob: number;
+  monthlyGrowth: number;
+  mostPopularRole: string;
+  responseRate: number;
 }
 
 export interface EmployerData {
-  profile: EmployerProfile;
-  company: EmployerCompany;
-  jobs: EmployerJobPosting[];
-  applications: EmployerApplication[];
-  stats: EmployerStats;
+  overview: DashboardOverview;
+  applicationStats: ApplicationStats;
+  recentActivity: RecentActivity[];
+  analytics: Analytics;
+  insights: Insights;
 }
 
 export interface EmployerApiResponse {
