@@ -29,7 +29,8 @@ export type Company = {
 export function useMyCompany() {
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error>({ message: '' });
+  const [error, setError] = useState<Error | null>(null);
+
 
   useEffect(() => {
     async function fetchMyCompany() {
