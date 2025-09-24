@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FiX, FiPlus, FiGrid } from "react-icons/fi";
 import { FieldType, FieldTypeValue, JobFormField } from "./types";
+import { useRef } from "react";
 
 interface JobFormModalProps {
   open: boolean;
@@ -38,51 +39,57 @@ export default function JobFormModal({
   const [fields, setFields] = useState<JobFormField[]>([]);
   const [editingField, setEditingField] = useState<JobFormField | null>(null);
   const [showFieldEditor, setShowFieldEditor] = useState(false);
+  const idCounter = useRef<number>(Date.now());
 
   useEffect(() => {
-    if (open) {
-      if (existingFields && existingFields.length > 0) {
-        setFields(existingFields.map((f, i) => ({
-            ...f,
-            order: f.order || i + 1,
-            fieldType: f.fieldType.toUpperCase() as FieldTypeValue, 
-            options: f.options || [],
-            isRequired: f.isRequired, // Use isRequired from API
-        })));
-      } else {
-        setFields([
-          {
-            fieldType: FieldType.TEXT,
-            label: "Full Name",
-            isRequired: true, // Changed from 'required' to 'isRequired'
-            order: 1,
-            options: [],
-          },
-          {
-            fieldType: FieldType.EMAIL,
-            label: "Email Address",
-            isRequired: true,
-            order: 2,
-            options: [],
-          },
-          {
-            fieldType: FieldType.PHONE,
-            label: "Phone Number",
-            isRequired: true,
-            order: 3,
-            options: [],
-          },
-          {
-            fieldType: FieldType.RESUME_URL,
-            label: "Resume",
-            isRequired: true,
-            order: 4,
-            options: [],
-          },
-        ]);
-      }
-    }
-  }, [open, existingFields]);
+  if (!open) return;
+
+  if (existingFields && existingFields.length > 0) {
+    // Edit mode → load from API
+    setFields(
+      existingFields.map((f, i) => ({
+        ...f, 
+        order: f.order || i + 1,
+        fieldType: f.fieldType.toUpperCase() as FieldTypeValue,
+        options: f.options || [],
+        isRequired: f.isRequired,
+      }))
+    );
+  } else {
+    // Create mode → only add defaults if there are no existing fields
+    setFields([
+      {
+        fieldType: FieldType.TEXT,
+        label: "Full Name",
+        isRequired: true,
+        order: 1,
+        options: [],
+      },
+      {
+        fieldType: FieldType.EMAIL,
+        label: "Email Address",
+        isRequired: true,
+        order: 2,
+        options: [],
+      },
+      {
+        fieldType: FieldType.PHONE,
+        label: "Phone Number",
+        isRequired: true,
+        order: 3,
+        options: [],
+      },
+      {
+        fieldType: FieldType.RESUME_URL,
+        label: "Resume",
+        isRequired: true,
+        order: 4,
+        options: [],
+      },
+    ]);
+  }
+}, [open, existingFields]);
+
 
   const handleAddField = () => {
     setEditingField({
@@ -100,28 +107,41 @@ export default function JobFormModal({
     setShowFieldEditor(true);
   };
 
-  const handleSaveField = () => {
-    if (!editingField || !editingField.label.trim()) {
-      alert("Field label is required");
-      return;
-    }
+const handleSaveField = () => {
+  if (!editingField || !editingField.label.trim()) {
+    alert("Field label is required");
+    return;
+  }
 
-    const cleanedOptions = editingField.options?.filter((opt) => opt.trim() !== "") || [];
+  const cleanedOptions = editingField.options?.filter((opt) => opt.trim() !== "") || [];
 
-    const fieldToSave: JobFormField = {
-      ...editingField,
-      options: cleanedOptions,
-    };
-
-    if (editingField.id) {
-      setFields(fields.map((f) => (f.id === editingField.id ? fieldToSave : f)));
-    } else {
-      const newField = { ...fieldToSave, id: Date.now(), order: fields.length + 1 };
-      setFields([...fields, newField]);
-    }
-    setEditingField(null);
-    setShowFieldEditor(false);
+  const fieldToSave: JobFormField = {
+    ...editingField,
+    options: cleanedOptions,
   };
+
+
+const getUniqueId = () => {
+  idCounter.current += 1;
+  return idCounter.current;
+};
+
+
+  setFields((prevFields) => {
+    if (editingField.id) {
+      // Update existing field by id
+      return prevFields.map((f) => (f.id === editingField.id ? fieldToSave : f));
+    } else {
+      // Add new field with unique id
+      const newField = { ...fieldToSave, id: getUniqueId(), order: prevFields.length + 1 };
+
+      return [...prevFields, newField];
+    }
+  });
+
+  setEditingField(null);
+  setShowFieldEditor(false);
+};
 
   const handleDeleteField = async (field: JobFormField) => {
     if (field.id && jobId && onDeleteField && field.id > 1000) {
@@ -238,12 +258,12 @@ export default function JobFormModal({
 
         {/* Field Editor Modal */}
         {showFieldEditor && editingField && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md max-h-[90vh] overflow-auto">
-              <h3 className="text-lg font-semibold mb-4">
+              <h3 className="text-lg font-semibold mb-4 text-blue-600">
                 {editingField.id ? "Edit Field" : "Add Field"}
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-4 text-black">
                 <div>
                   <label className="block mb-1">Label</label>
                   <input
@@ -319,7 +339,7 @@ export default function JobFormModal({
 
               <div className="flex justify-end gap-2 mt-6">
                 <button
-                  className="px-4 py-2 border rounded"
+                  className="px-4 py-2 border rounded border-gray-300 bg-red-500"
                   onClick={() => {
                     setShowFieldEditor(false);
                     setEditingField(null);
