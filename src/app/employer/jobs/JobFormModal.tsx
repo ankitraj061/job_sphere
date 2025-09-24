@@ -18,7 +18,7 @@ const FIELD_TYPES = [
   { value: FieldType.PHONE, label: "Phone" },
   { value: FieldType.LOCATION, label: "Location" },
   { value: FieldType.RESUME_URL, label: "Resume URL" },
-  { value: FieldType.FILE, label: "File Upload" }, // Added FILE type
+  { value: FieldType.FILE, label: "File Upload" },
   { value: FieldType.TEXTAREA, label: "Text Area" },
   { value: FieldType.SELECT, label: "Dropdown" },
   { value: FieldType.MULTISELECT, label: "Multi Select" },
@@ -40,55 +40,30 @@ export default function JobFormModal({
   const [showFieldEditor, setShowFieldEditor] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      if (existingFields && existingFields.length > 0) {
-        setFields(existingFields.map((f, i) => ({
-            ...f,
-            order: f.order || i + 1,
-            fieldType: f.fieldType.toUpperCase() as FieldTypeValue, 
-            options: f.options || [],
-            isRequired: f.isRequired, // Use isRequired from API
-        })));
-      } else {
-        setFields([
-          {
-            fieldType: FieldType.TEXT,
-            label: "Full Name",
-            isRequired: true, // Changed from 'required' to 'isRequired'
-            order: 1,
-            options: [],
-          },
-          {
-            fieldType: FieldType.EMAIL,
-            label: "Email Address",
-            isRequired: true,
-            order: 2,
-            options: [],
-          },
-          {
-            fieldType: FieldType.PHONE,
-            label: "Phone Number",
-            isRequired: true,
-            order: 3,
-            options: [],
-          },
-          {
-            fieldType: FieldType.RESUME_URL,
-            label: "Resume",
-            isRequired: true,
-            order: 4,
-            options: [],
-          },
-        ]);
-      }
+    if (open && existingFields && existingFields.length > 0) {
+      setFields(existingFields.map((f, i) => ({
+        ...f,
+        order: f.order || i + 1,
+        fieldType: f.fieldType.toUpperCase() as FieldTypeValue,
+        options: f.options || [],
+        isRequired: f.isRequired,
+      })));
     }
   }, [open, existingFields]);
+
+  const validateUniqueLabel = (newLabel: string, excludeId?: number): boolean => {
+    const normalizedNewLabel = newLabel.trim().toLowerCase();
+    return !fields.some(field => 
+      field.id !== excludeId && 
+      field.label.trim().toLowerCase() === normalizedNewLabel
+    );
+  };
 
   const handleAddField = () => {
     setEditingField({
       fieldType: FieldType.TEXT,
       label: "",
-      isRequired: false, // Changed from 'required' to 'isRequired'
+      isRequired: false,
       order: fields.length + 1,
       options: [],
     });
@@ -106,10 +81,17 @@ export default function JobFormModal({
       return;
     }
 
+    // Validate unique label
+    if (!validateUniqueLabel(editingField.label, editingField.id)) {
+      alert("Field label must be unique. Please choose a different label.");
+      return;
+    }
+
     const cleanedOptions = editingField.options?.filter((opt) => opt.trim() !== "") || [];
 
     const fieldToSave: JobFormField = {
       ...editingField,
+      label: editingField.label.trim(), // Ensure trimmed label
       options: cleanedOptions,
     };
 
@@ -126,8 +108,13 @@ export default function JobFormModal({
   const handleDeleteField = async (field: JobFormField) => {
     if (field.id && jobId && onDeleteField && field.id > 1000) {
       if (window.confirm(`Are you sure you want to delete the field "${field.label}"?`)) {
-        await onDeleteField(jobId, field.id);
-        setFields(fields.filter((f) => f.id !== field.id));
+        try {
+          await onDeleteField(jobId, field.id);
+          setFields(fields.filter((f) => f.id !== field.id));
+        } catch (error) {
+          console.error("Error deleting field:", error);
+          alert("Failed to delete field. Please try again.");
+        }
       }
     } else {
       setFields(fields.filter((f) => f !== field));
@@ -136,7 +123,15 @@ export default function JobFormModal({
 
   const handleSaveForm = () => {
     if (fields.length === 0) {
-      alert("Please add at least one field to the form");
+      alert("Cannot save empty form. The default fields will be used.");
+      return;
+    }
+
+    // Validate all fields have unique labels
+    const labels = fields.map(f => f.label.trim().toLowerCase());
+    const uniqueLabels = new Set(labels);
+    if (labels.length !== uniqueLabels.size) {
+      alert("All field labels must be unique. Please check for duplicates.");
       return;
     }
 
@@ -146,19 +141,24 @@ export default function JobFormModal({
       return;
     }
 
-    onSave(validFields);
+    // Ensure labels are trimmed before sending
+    const processedFields = validFields.map(field => ({
+      ...field,
+      label: field.label.trim()
+    }));
+
+    onSave(processedFields);
   };
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
->
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-bold text-blue-600">
-            {existingFields ? "Update Job Form" : "Create Job Form"}
+            Update Job Form
           </h2>
           <button onClick={onClose} className="p-2 bg-red-400 hover:bg-red-500 rounded">
             <FiX />
@@ -180,9 +180,14 @@ export default function JobFormModal({
             </div>
 
             {fields.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
-                No fields added yet. Click &quot;Add Field&quot; to get started.
-              </p>
+              <div className="text-center py-8 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-blue-700 font-medium mb-2">
+                  Default form fields are automatically created when a job is posted.
+                </p>
+                <p className="text-blue-600 text-sm">
+                  You can add additional custom fields using the &quot;Add Field&quot; button above.
+                </p>
+              </div>
             ) : (
               <div className="space-y-3">
                 {fields.map((field, index) => (
@@ -200,13 +205,18 @@ export default function JobFormModal({
                       <div className="flex-grow text-black">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{field.label}</span>
-                          {field.isRequired && ( // Changed from 'required' to 'isRequired'
+                          {field.isRequired && (
                             <span className="text-red-500 text-sm">*</span>
                           )}
                           <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">
                             {FIELD_TYPES.find((t) => t.value === field.fieldType)?.label ||
                               field.fieldType}
                           </span>
+                          {field.isDefault && (
+                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                              Default
+                            </span>
+                          )}
                         </div>
                         {field.options && field.options.length > 0 && (
                           <div className="text-sm text-gray-600 mt-1">
@@ -218,13 +228,15 @@ export default function JobFormModal({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleEditField(field)}
-                        className="px-3 py-1 text-blue-600 border border-blue-600 rounded hover:bg-blue-50"
+                        disabled={field.isDefault}
+                        className="px-3 py-1 text-blue-600 border border-blue-600 rounded hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeleteField(field)}
-                        className="px-3 py-1 text-red-600 border border-red-600 rounded hover:bg-red-50"
+                        disabled={field.isDefault}
+                        className="px-3 py-1 text-red-600 border border-red-600 rounded hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Delete
                       </button>
@@ -253,6 +265,7 @@ export default function JobFormModal({
                       setEditingField({ ...editingField, label: e.target.value })
                     }
                     className="w-full border rounded p-2"
+                    placeholder="Enter unique field label"
                   />
                 </div>
 
@@ -308,9 +321,9 @@ export default function JobFormModal({
                   <input
                     type="checkbox"
                     id="required-checkbox"
-                    checked={editingField.isRequired} // Changed from 'required' to 'isRequired'
+                    checked={editingField.isRequired}
                     onChange={(e) =>
-                      setEditingField({ ...editingField, isRequired: e.target.checked }) // Changed from 'required' to 'isRequired'
+                      setEditingField({ ...editingField, isRequired: e.target.checked })
                     }
                   />
                   <label htmlFor="required-checkbox">Required</label>
@@ -344,7 +357,7 @@ export default function JobFormModal({
             onClick={handleSaveForm}
             className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-semibold transition-colors"
           >
-            Save Form
+            Update Form
           </button>
         </div>
       </div>
