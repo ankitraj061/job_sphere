@@ -1,4 +1,3 @@
-// Enhanced Field Types with better validation
 export enum FieldType {
   TEXT = "TEXT",
   NUMBER = "NUMBER",
@@ -17,27 +16,6 @@ export enum FieldType {
 
 export type FieldTypeValue = `${FieldType}`;
 
-// Job Status enum for better type safety
-export enum JobStatus {
-  ACTIVE = "ACTIVE",
-  PAUSED = "PAUSED",
-  COMPLETED = "COMPLETED",
-  DRAFT = "DRAFT"
-}
-
-export type JobStatusValue = `${JobStatus}`;
-
-// Job Type enum
-export enum JobType {
-  FULL_TIME = "FULL_TIME",
-  PART_TIME = "PART_TIME",
-  INTERNSHIP = "INTERNSHIP",
-  CONTRACT = "CONTRACT"
-}
-
-export type JobTypeValue = `${JobType}`;
-
-// Enhanced JobFormField interface with validation
 export interface JobFormField {
   id?: number;
   jobId?: number;
@@ -47,56 +25,8 @@ export interface JobFormField {
   isDefault?: boolean;
   options?: string[];
   order: number;
-  placeholder?: string;
-  description?: string;
-  minLength?: number;
-  maxLength?: number;
-  pattern?: string; // For regex validation
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-// Validation rules for form fields
-// export interface FieldValidationRule {
-//   required?: boolean;
-//   minLength?: number;
-//   maxLength?: number;
-//   pattern?: RegExp;
-//   customValidator?: (value: any) => boolean | string;
-// }
-
-// export interface FieldValidationRules {
-//   [FieldType.TEXT]: FieldValidationRule;
-//   [FieldType.EMAIL]: FieldValidationRule;
-//   [FieldType.PHONE]: FieldValidationRule;
-//   [FieldType.TEXTAREA]: FieldValidationRule;
-//   [FieldType.NUMBER]: FieldValidationRule;
-//   [FieldType.YEARS_OF_EXPERIENCE]: FieldValidationRule;
-//   [FieldType.LOCATION]: FieldValidationRule;
-//   [FieldType.RESUME_URL]: FieldValidationRule;
-//   [FieldType.FILE]: FieldValidationRule;
-//   [FieldType.SELECT]: FieldValidationRule;
-//   [FieldType.MULTISELECT]: FieldValidationRule;
-//   [FieldType.CHECKBOX]: FieldValidationRule;
-//   [FieldType.DATE]: FieldValidationRule;
-// }
-
-// // Enhanced Company interface
-export interface Company {
-  id: number;
-  name: string;
-  profilePicture?: string;
-  industry?: string;
-  description?: string;
-  website?: string;
-  location?: string;
-  size?: string;
-  founded?: string;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-// Enhanced Job interface with better typing
 export interface Job {
   id: number;
   title: string;
@@ -104,51 +34,62 @@ export interface Job {
   description: string;
   requirements?: string;
   location?: string;
-  jobType: JobTypeValue;
+  jobType: string;
   salaryMin?: number;
   salaryMax?: number;
   noOfOpenings?: number;
-  status: JobStatusValue;
+  status: string;
   totalApplications: number;
-  pendingApplications?: number;
-  rejectedApplications?: number;
-  acceptedApplications?: number;
   createdAt: string;
   updatedAt?: string;
-  expiresAt?: string;
   companyId?: number;
   employerId?: number;
-  company?: Company;
+  company?: {
+    id: number;
+    name: string;
+    profilePicture?: string;
+    industry?: string;
+  };
   _count?: {
     applications: number;
-    formFields?: number;
   };
-  tags?: string[];
-  isRemote?: boolean;
-  benefits?: string[];
-  skills?: string[];
+  pendingApplications?: number;
 }
 
-// Enhanced JobForm interface with validation
 export interface JobForm {
   title: string;
   role: string;
   description: string;
   requirements: string;
   location: string;
-  jobType: JobTypeValue;
+  jobType: string;
   salaryMin: number | "";
   salaryMax: number | "";
   noOfOpenings: number | "";
-  isRemote?: boolean;
-  expiresAt?: string;
-  tags?: string[];
-  benefits?: string[];
-  skills?: string[];
 }
 
-// Form validation errors
-export interface JobFormErrors {
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
+
+export interface JobsResponse {
+  jobs: Job[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+export interface JobFormResponse {
+  fields: JobFormField[];
+}
+
+// Additional utility types for better TypeScript support
+export interface ValidationErrors {
   title?: string;
   role?: string;
   description?: string;
@@ -158,284 +99,132 @@ export interface JobFormErrors {
   salaryMin?: string;
   salaryMax?: string;
   noOfOpenings?: string;
-  expiresAt?: string;
   general?: string;
 }
 
-// API Response interfaces with better error handling
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  errors?: Record<string, string[]>;
-  meta?: {
-    timestamp: string;
-    requestId?: string;
-  };
-}
-
-// Enhanced pagination interface
-export interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  pages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-  offset: number;
-}
-
-// Jobs response with enhanced pagination
-export interface JobsResponse {
-  jobs: Job[];
-  pagination: Pagination;
-  filters?: {
-    status?: JobStatusValue;
-    jobType?: JobTypeValue;
-    search?: string;
-    location?: string;
-  };
-  stats?: {
-    totalJobs: number;
-    activeJobs: number;
-    pausedJobs: number;
-    completedJobs: number;
-  };
-}
-
-// Job form response
-export interface JobFormResponse {
-  fields: JobFormField[];
-  metadata?: {
-    totalFields: number;
-    requiredFields: number;
-    defaultFields: number;
-  };
-}
-
-// Search and filter interfaces
-export interface JobSearchParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-  status?: JobStatusValue;
-  jobType?: JobTypeValue;
-  location?: string;
-  salaryMin?: number;
-  salaryMax?: number;
-  sortBy?: 'createdAt' | 'updatedAt' | 'title' | 'applications';
-  sortOrder?: 'asc' | 'desc';
-}
-
-export interface SearchFilters {
+export interface SearchFiltersProps {
   searchTerm: string;
-  statusFilter: JobStatusValue | 'All Status';
-  jobTypeFilter: JobTypeValue | 'All Types';
-  locationFilter: string;
-  salaryRange: {
-    min: number | '';
-    max: number | '';
-  };
+  setSearchTerm: (term: string) => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
+  onSearch: () => void;
+  onReset?: () => void;
+  isLoading?: boolean;
+  totalResults?: number;
+  currentPage?: number;
+  totalPages?: number;
 }
 
-// // Application related interfaces
-// export interface JobApplication {
-//   id: number;
-//   jobId: number;
-//   applicantId: number;
-//   status: 'PENDING' | 'REVIEWED' | 'SHORTLISTED' | 'REJECTED' | 'ACCEPTED';
-//   appliedAt: string;
-//   reviewedAt?: string;
-//   notes?: string;
-//   applicant?: {
-//     id: number;
-//     name: string;
-//     email: string;
-//     phone?: string;
-//     resumeUrl?: string;
-//   };
-//   formData?: Record<string, any>;
-// }
-
-// Statistics interfaces
-export interface JobStats {
-  totalViews: number;
-  totalApplications: number;
-  applicationsByStatus: {
-    pending: number;
-    reviewed: number;
-    shortlisted: number;
-    rejected: number;
-    accepted: number;
-  };
-  applicationsByDay: {
-    date: string;
-    count: number;
-  }[];
-  averageResponseTime?: number;
-  conversionRate?: number;
+export interface JobCreateModalProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (form: JobForm) => void;
+  editingJob?: Job | null;
 }
 
-export interface DashboardStats {
-  totalJobs: number;
-  activeJobs: number;
-  totalApplications: number;
-  pendingApplications: number;
-  jobsByStatus: {
-    [key in JobStatusValue]: number;
-  };
-  recentActivity: {
-    type: 'job_created' | 'application_received' | 'job_updated' | 'application_reviewed';
-    message: string;
-    timestamp: string;
-  }[];
+export interface JobFormModalProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (fields: JobFormField[]) => void;
+  existingFields?: JobFormField[] | null;
+  jobId?: number | null;
+  onDeleteField?: (jobId: number, fieldId: number) => void;
 }
 
-// Utility types
-export type CreateJobRequest = Omit<Job, 'id' | 'createdAt' | 'updatedAt' | 'totalApplications' | 'company' | '_count'>;
-export type UpdateJobRequest = Partial<CreateJobRequest>;
-export type JobFormFieldCreate = Omit<JobFormField, 'id' | 'createdAt' | 'updatedAt'>;
-export type JobFormFieldUpdate = Partial<JobFormFieldCreate>;
+// Constants for dropdowns and validation
+export const JOB_TYPES = [
+  { value: "FULL_TIME", label: "Full Time" },
+  { value: "PART_TIME", label: "Part Time" },
+  { value: "INTERNSHIP", label: "Internship" },
+  { value: "CONTRACT", label: "Contract" },
+] as const;
 
-// Loading and error state types
-export interface LoadingState {
-  isLoading: boolean;
-  loadingMessage?: string;
-}
+export const JOB_ROLES = [
+  { value: "SOFTWARE_ENGINEER", label: "Software Engineer" },
+  { value: "BACKEND_DEVELOPER", label: "Backend Developer" },
+  { value: "FRONTEND_DEVELOPER", label: "Frontend Developer" },
+  { value: "FULLSTACK_DEVELOPER", label: "Fullstack Developer" },
+  { value: "DATA_SCIENTIST", label: "Data Scientist" },
+  { value: "DATA_ANALYST", label: "Data Analyst" },
+  { value: "DEVOPS_ENGINEER", label: "DevOps Engineer" },
+  { value: "CLOUD_ENGINEER", label: "Cloud Engineer" },
+  { value: "ML_ENGINEER", label: "ML Engineer" },
+  { value: "AI_ENGINEER", label: "AI Engineer" },
+  { value: "MOBILE_DEVELOPER", label: "Mobile Developer" },
+  { value: "ANDROID_DEVELOPER", label: "Android Developer" },
+  { value: "IOS_DEVELOPER", label: "iOS Developer" },
+  { value: "UI_UX_DESIGNER", label: "UI/UX Designer" },
+  { value: "PRODUCT_MANAGER", label: "Product Manager" },
+  { value: "PROJECT_MANAGER", label: "Project Manager" },
+  { value: "BUSINESS_ANALYST", label: "Business Analyst" },
+  { value: "QA_ENGINEER", label: "QA Engineer" },
+  { value: "TEST_AUTOMATION_ENGINEER", label: "Test Automation Engineer" },
+  { value: "CYBERSECURITY_ANALYST", label: "Cybersecurity Analyst" },
+  { value: "NETWORK_ENGINEER", label: "Network Engineer" },
+  { value: "SYSTEM_ADMIN", label: "System Admin" },
+  { value: "DATABASE_ADMIN", label: "Database Admin" },
+  { value: "BLOCKCHAIN_DEVELOPER", label: "Blockchain Developer" },
+  { value: "GAME_DEVELOPER", label: "Game Developer" },
+  { value: "TECH_SUPPORT", label: "Tech Support" },
+  { value: "CONTENT_WRITER", label: "Content Writer" },
+  { value: "DIGITAL_MARKETER", label: "Digital Marketer" },
+  { value: "SALES_ASSOCIATE", label: "Sales Associate" },
+  { value: "HR_MANAGER", label: "HR Manager" },
+] as const;
 
-export interface ErrorState {
-  hasError: boolean;
-  error: Error | null;
-  errorCode?: string;
-}
+export const FIELD_TYPES = [
+  { value: FieldType.TEXT, label: "Text Input" },
+  { value: FieldType.NUMBER, label: "Number" },
+  { value: FieldType.EMAIL, label: "Email" },
+  { value: FieldType.PHONE, label: "Phone" },
+  { value: FieldType.LOCATION, label: "Location" },
+  { value: FieldType.RESUME_URL, label: "Resume URL" },
+  { value: FieldType.FILE, label: "File Upload" },
+  { value: FieldType.TEXTAREA, label: "Text Area" },
+  { value: FieldType.SELECT, label: "Dropdown" },
+  { value: FieldType.MULTISELECT, label: "Multi Select" },
+  { value: FieldType.CHECKBOX, label: "Checkbox" },
+  { value: FieldType.DATE, label: "Date" },
+  { value: FieldType.YEARS_OF_EXPERIENCE, label: "Years of Experience" },
+] as const;
 
-export interface AsyncState<T> extends LoadingState, ErrorState {
-  data: T | null;
-  lastFetched?: string;
-}
-
-// Modal and UI state types
-// export interface ModalState {
-//   isOpen: boolean;
-//   data?: any;
-//   mode?: 'create' | 'edit' | 'view' | 'delete';
-// }
-
-// export interface UIState {
-//   sidebarOpen: boolean;
-//   theme: 'light' | 'dark' | 'system';
-//   notifications: Notification[];
-//   modals: {
-//     jobCreate: ModalState;
-//     jobForm: ModalState;
-//     jobPreview: ModalState;
-//     statusUpdate: ModalState;
-//     deleteConfirm: ModalState;
-//   };
-// }
-
-export interface Notification {
-  id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
-}
-
-// Form step types for multi-step forms
-// export interface FormStep {
-//   id: string;
-//   title: string;
-//   description?: string;
-//   isComplete: boolean;
-//   isActive: boolean;
-//   component: React.ComponentType<any>;
-// }
-
-// export interface MultiStepFormState {
-//   currentStep: number;
-//   steps: FormStep[];
-//   formData: Record<string, any>;
-//   canGoBack: boolean;
-//   canGoNext: boolean;
-//   isSubmitting: boolean;
-// }
-
-// // Export all types for easy importing
-// export type {
-//   FieldTypeValue,
-//   JobStatusValue,
-//   JobTypeValue,
-//   JobFormField,
-//   Job,
-//   JobForm,
-//   JobFormErrors,
-//   Company,
-//   ApiResponse,
-//   JobsResponse,
-//   JobFormResponse,
-//   Pagination,
-//   JobSearchParams,
-//   SearchFilters,
-//   JobApplication,
-//   JobStats,
-//   DashboardStats,
-//   CreateJobRequest,
-//   UpdateJobRequest,
-//   JobFormFieldCreate,
-//   JobFormFieldUpdate,
-//   LoadingState,
-//   ErrorState,
-//   AsyncState,
-//   ModalState,
-//   UIState,
-//   Notification,
-//   FormStep,
-//   MultiStepFormState,
-// };
-
-// Default values and constants
-export const DEFAULT_PAGINATION: Pagination = {
-  page: 1,
-  limit: 10,
-  total: 0,
-  pages: 0,
-  hasNext: false,
-  hasPrev: false,
-  offset: 0,
+// Status color mapping
+export const getStatusColor = (status: string): string => {
+  switch (status.toLowerCase()) {
+    case "active":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "paused":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    case "completed":
+      return "bg-gray-100 text-gray-800 border-gray-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
+  }
 };
 
-export const DEFAULT_SEARCH_PARAMS: JobSearchParams = {
-  page: 1,
-  limit: 10,
-  sortBy: 'createdAt',
-  sortOrder: 'desc',
-};
+// Form validation helper
+export const validateJobForm = (form: JobForm): ValidationErrors => {
+  const errors: ValidationErrors = {};
 
-export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
-  [FieldType.TEXT]: "Text Input",
-  [FieldType.NUMBER]: "Number",
-  [FieldType.EMAIL]: "Email",
-  [FieldType.PHONE]: "Phone",
-  [FieldType.LOCATION]: "Location",
-  [FieldType.RESUME_URL]: "Resume URL",
-  [FieldType.FILE]: "File Upload",
-  [FieldType.TEXTAREA]: "Text Area",
-  [FieldType.SELECT]: "Dropdown",
-  [FieldType.MULTISELECT]: "Multi Select",
-  [FieldType.CHECKBOX]: "Checkbox",
-  [FieldType.DATE]: "Date",
-  [FieldType.YEARS_OF_EXPERIENCE]: "Years of Experience",
-};
+  if (!form.title || form.title.trim().length < 3) {
+    errors.title = "Job title must be at least 3 characters long";
+  }
 
-export const JOB_STATUS_COLORS: Record<JobStatus, string> = {
-  [JobStatus.ACTIVE]: "bg-green-100 text-green-800 border-green-200",
-  [JobStatus.PAUSED]: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  [JobStatus.COMPLETED]: "bg-gray-100 text-gray-800 border-gray-200",
-  [JobStatus.DRAFT]: "bg-blue-100 text-blue-800 border-blue-200",
+  if (!form.role) {
+    errors.role = "Please select a job role";
+  }
+
+  if (!form.description || form.description.trim().length < 20) {
+    errors.description = "Job description must be at least 20 characters long";
+  }
+
+  if (form.salaryMin && form.salaryMax && Number(form.salaryMin) > Number(form.salaryMax)) {
+    errors.salaryMax = "Maximum salary must be higher than minimum salary";
+  }
+
+  if (form.noOfOpenings && (isNaN(Number(form.noOfOpenings)) || Number(form.noOfOpenings) < 1)) {
+    errors.noOfOpenings = "Number of openings must be at least 1";
+  }
+
+  return errors;
 };

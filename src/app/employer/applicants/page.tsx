@@ -158,7 +158,7 @@ export default function JobApplicantsPage() {
       </div>
     ) : (
       <select
-        className="w-full rounded-2xl p-3 bg-white border border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-black font-medium"
+        className="w-full rounded-2xl p-3 bg-white border border-blue-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-black font-medium cursor-pointer"
         value={selectedJobId ?? ""}
         onChange={(e) => {
           const val = e.target.value;
@@ -224,7 +224,7 @@ export default function JobApplicantsPage() {
                   disabled={updatingStatusId === app.id}
                   value={app.status}
                   onChange={(e) => updateApplicationStatus(app.id, e.target.value)}
-                  className="rounded-md px-2 py-1 font-semibold bg-white border border-blue-300 focus:ring-2 focus:ring-blue-500 transition disabled:opacity-50 text-blue-900"
+                  className="rounded-md px-2 py-1 font-semibold bg-white border border-blue-300 focus:ring-2 focus:ring-blue-500 transition disabled:opacity-50 text-blue-900 cursor-pointer"
                   aria-label={`Update status for ${app.jobSeeker.user.name}`}
                 >
                   {STATUS_OPTIONS.map((status) => (
@@ -237,7 +237,7 @@ export default function JobApplicantsPage() {
               <td className="p-4 text-center">
                 <button
                   onClick={() => setViewingApplicant(app)}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition cursor-pointer"
                   type="button"
                   aria-label={`View profile of ${app.jobSeeker.user.name}`}
                 >
