@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FiX, FiPlus, FiGrid } from "react-icons/fi";
 import { FieldType, FieldTypeValue, JobFormField } from "./types";
 import { useRef } from "react";
+import {toast} from 'sonner';
 
 interface JobFormModalProps {
   open: boolean;
@@ -116,13 +117,13 @@ export default function JobFormModal({
 
   const handleSaveField = () => {
     if (!editingField || !editingField.label.trim()) {
-      alert("Field label is required");
+      toast.error("Field label is required");
       return;
     }
 
     // Validate unique label
     if (!validateUniqueLabel(editingField.label, editingField.id)) {
-      alert("Field label must be unique. Please choose a different label.");
+      toast.error("Field label must be unique. Please choose a different label.");
       return;
     }
 
@@ -162,7 +163,7 @@ export default function JobFormModal({
           setFields(fields.filter((f) => f.id !== field.id));
         } catch (error) {
           console.error("Error deleting field:", error);
-          alert("Failed to delete field. Please try again.");
+          toast.error("Failed to delete field. Please try again.");
         }
       }
     } else {
@@ -172,7 +173,7 @@ export default function JobFormModal({
 
   const handleSaveForm = () => {
     if (fields.length === 0) {
-      alert("Cannot save empty form. The default fields will be used.");
+      toast.error("Cannot save empty form. The default fields will be used.");
       return;
     }
 
@@ -180,13 +181,13 @@ export default function JobFormModal({
     const labels = fields.map(f => f.label.trim().toLowerCase());
     const uniqueLabels = new Set(labels);
     if (labels.length !== uniqueLabels.size) {
-      alert("All field labels must be unique. Please check for duplicates.");
+      toast.error("All field labels must be unique. Please check for duplicates.");
       return;
     }
 
     const validFields = fields.filter((field) => field.label.trim());
     if (validFields.length !== fields.length) {
-      alert("All fields must have labels");
+      toast.error("All fields must have labels");
       return;
     }
 
@@ -381,7 +382,7 @@ export default function JobFormModal({
 
               <div className="flex justify-end gap-2 mt-6">
                 <button
-                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                  className="px-4 py-2 bg-red-600 text-white border border-gray-300 rounded hover:bg-red-700"
                   onClick={() => {
                     setShowFieldEditor(false);
                     setEditingField(null);

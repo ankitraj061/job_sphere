@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {toast} from "sonner"
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -70,11 +71,11 @@ export default function JobApplicantsPage() {
         if (response.data.success) {
           setJobs(response.data.data.jobs);
         } else {
-          alert("Failed to load jobs");
+          toast.error("Failed to load jobs");
         }
       } catch (err) {
         console.error(err);
-        alert("Error loading jobs");
+        toast.error("Error loading jobs");
       } finally {
         setLoadingJobs(false);
       }
@@ -103,11 +104,11 @@ export default function JobApplicantsPage() {
           setApplications(response.data.data.applications);
           setTotalPages(response.data.data.pagination.pages);
         } else {
-          alert("Failed to load applications");
+          toast.error("Failed to load applications");
         }
       } catch (err) {
         console.error(err);
-        alert("Error loading applications");
+        toast.error("Error loading applications");
       } finally {
         setLoadingApplications(false);
       }
@@ -132,11 +133,11 @@ export default function JobApplicantsPage() {
         );
         setApplications(refreshedApps.data.data.applications);
       } else {
-        alert("Failed to update status");
+        toast.error("Failed to update status");
       }
     } catch (err) {
       console.error(err);
-      alert("Error updating status");
+      toast.error("Error updating status");
     } finally {
       setUpdatingStatusId(null);
     }

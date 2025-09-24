@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from 'sonner';
 import {
   FiPlus,
   FiMoreVertical,
@@ -80,7 +81,7 @@ function JobFormPreviewModal({
         <div className="sticky bottom-0 bg-white border-t border-gray-100 p-6 rounded-b-2xl">
           <button
             onClick={onClose}
-            className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold"
+            className="w-full px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold"
           >
             Close Preview
           </button>
@@ -272,14 +273,16 @@ export default function EmployerJobsPage() {
         setDrawerOpen(false);
         setEditingJob(null);
         fetchJobs();
-        alert(editingJob ? "Job updated successfully!" : "Job created successfully! Default form fields have been created automatically.");
-      } else {
-        alert("Failed to save job");
+        toast.success(
+            editingJob ? "Job updated successfully!" : "Job created successfully! Default form fields have been created automatically."
+          );
+        } else {
+          toast.error("Failed to save job");
+        }
+      } catch (err) {
+        console.error("Error saving job:", err);
+        toast.error("Error saving job");
       }
-    } catch (err) {
-      console.error("Error saving job:", err);
-      alert("Error saving job");
-    }
   };
 
   const handleUpdateJobStatus = async (jobId: number, newStatus: string) => {
@@ -290,16 +293,16 @@ export default function EmployerJobsPage() {
         { withCredentials: true }
       );
       if (response.data.success) {
-        alert("Job status updated successfully!");
+        toast.success("Job status updated successfully!");
         fetchJobs();
         setStatusModalOpen(false);
         setStatusUpdateJob(null);
       } else {
-        alert("Failed to update job status");
+        toast.error("Failed to update job status");
       }
     } catch (err) {
       console.error("Error updating job status:", err);
-      alert("Error updating job status");
+      toast.error("Error updating job status");
     }
   };
 
@@ -310,16 +313,16 @@ export default function EmployerJobsPage() {
         { withCredentials: true }
       );
       if (response.data.success) {
-        alert("Job deleted successfully!");
+        toast.success("Job deleted successfully!");
         fetchJobs();
         setDeleteModalOpen(false);
         setJobToDelete(null);
       } else {
-        alert("Failed to delete job");
+        toast.error("Failed to delete job");
       }
     } catch (err) {
       console.error("Error deleting job:", err);
-      alert("Error deleting job");
+      toast.error("Error deleting job");
     }
   };
 
@@ -353,7 +356,7 @@ const handleSaveJobForm = async (fields: JobFormField[]): Promise<void> => {
     });
 
     if (uniqueFields.length === 0) {
-      alert("No valid fields to save. Please add at least one unique field.");
+      toast.error("No valid fields to save. Please add at least one unique field.");
       return;
     }
 
@@ -373,12 +376,12 @@ const handleSaveJobForm = async (fields: JobFormField[]): Promise<void> => {
     );
 
     if (response.data.success) {
-      alert("Job form updated successfully!");
+      toast.success("Job form saved successfully!");
       setFormModalOpen(false);
       setEditingJobForm(null);
       setCurrentJobId(null);
     } else {
-      alert("Failed to save job form: " + (response.data.message ?? "Unknown error"));
+      toast.error("Failed to save job form");
     }
 
   } catch (err) {
@@ -387,9 +390,9 @@ const handleSaveJobForm = async (fields: JobFormField[]): Promise<void> => {
     const errorMessage = error.response?.data?.message ?? error.message ?? "Unknown error occurred";
 
     if (errorMessage.includes("Unique constraint failed") || errorMessage.includes("duplicate key")) {
-      alert("Error: Duplicate field labels detected. Please ensure all field labels are unique.");
+      toast.error("Error: Duplicate field labels detected. Please ensure all field labels are unique.");
     } else {
-      alert("Error saving job form: " + errorMessage);
+      toast.error("Error saving job form: ");
     }
   }
 };
@@ -402,17 +405,17 @@ const handleSaveJobForm = async (fields: JobFormField[]): Promise<void> => {
         { withCredentials: true }
       );
       if (response.data.success) {
-        alert("Job form field deleted successfully!");
+        toast.success("Job form field deleted successfully!");
         if (formModalOpen && currentJobId === jobId) {
           const updatedFields = await fetchJobForm(jobId);
           setEditingJobForm(updatedFields);
         }
       } else {
-        alert("Failed to delete job form field");
+        toast.error("Failed to delete job form field");
       }
     } catch (err) {
       console.error("Error deleting job form field:", err);
-      alert("Error deleting job form field");
+      toast.error("Error deleting job form field");
     }
   };
 
@@ -435,7 +438,7 @@ const handleSaveJobForm = async (fields: JobFormField[]): Promise<void> => {
   const handlePreviewJobForm = async (jobId: number) => {
     const fields = await fetchJobForm(jobId);
     if (fields.length === 0) {
-      alert("No form exists for this job yet.");
+      toast.error("No form exists for this job yet.");
       return;
     }
     setPreviewFormFields(fields);
