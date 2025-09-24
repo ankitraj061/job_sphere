@@ -86,7 +86,7 @@ export const JobProviderDashboard: React.FC = () => {
 
       {/* Stats Cards */}
       <div className="w-full overflow-x-auto">
-        <div className="min-w-[1200px] grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="min-w-[1200px] grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
           {/* <StatCard
             title="Total Jobs"
             value={data.overview.totalJobs}
@@ -117,11 +117,6 @@ export const JobProviderDashboard: React.FC = () => {
             value={data.overview.pendingApplications}
             icon={<Clock className="w-5 h-5 text-orange-600" />}
           />
-          <StatCard
-            title="Conversion Rate"
-            value={`${data.overview.conversionRate}%`}
-            icon={<Target className="w-5 h-5 text-red-600" />}
-          />
         </div>
       </div>
 
@@ -133,20 +128,16 @@ export const JobProviderDashboard: React.FC = () => {
           icon={<TrendingUp className="w-5 h-5 text-blue-600" />}
         />
         <StatCard
-          title="Monthly Growth"
-          value={`${data.insights.monthlyGrowth}%`}
-          icon={<TrendingUp className="w-5 h-5 text-green-600" />}
-        />
-        {/* <StatCard
-          title="Most Popular Role"
-          value={data.insights.mostPopularRole.replace('_', ' ')}
-          icon={<Target className="w-5 h-5 text-purple-600" />}
-        /> */}
-        <StatCard
           title="Response Rate"
           value={`${data.insights.responseRate}%`}
           icon={<Eye className="w-5 h-5 text-indigo-600" />}
         />
+
+        <StatCard
+            title="Conversion Rate"
+            value={`${data.overview.conversionRate}%`}
+            icon={<Target className="w-5 h-5 text-red-600" />}
+          />
       </div>
 
       {/* Charts Section */}

@@ -87,6 +87,7 @@ function JobFormPreviewModal({
 
 export default function EmployerJobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
@@ -106,37 +107,61 @@ export default function EmployerJobsPage() {
   const [previewFormOpen, setPreviewFormOpen] = useState(false);
   const [previewFormFields, setPreviewFormFields] = useState<JobFormField[] | null>(null);
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const params: { page?: number; search?: string; status?: string } = { page };
-      if (searchTerm.trim()) params.search = searchTerm.trim();
-      if (statusFilter !== "All Status")
-        params.status = statusFilter.toUpperCase();
+ const fetchJobs = async () => {
+  setLoading(true);
+  try {
+    const params: { page?: number; status?: string } = { page };
+    if (statusFilter !== "All Status") {
+      params.status = statusFilter.toUpperCase();
+    }
 
-      const response = await axios.get<ApiResponse<JobsResponse>>(`${backendUrl}/api/jobs/employer`, {
+    const response = await axios.get<ApiResponse<JobsResponse>>(
+      `${backendUrl}/api/jobs/employer`,
+      {
         params,
         withCredentials: true,
-      });
-
-      const data = response.data;
-      if (data.success) {
-        setJobs(data.data.jobs);
-        setTotalPages(data.data.pagination.pages);
-      } else {
-        alert("Failed to load jobs.");
       }
-    } catch (error) {
-      console.error("Fetch jobs error:", error);
-      alert("Error fetching jobs.");
-    }
-    setLoading(false);
-  };
+    );
 
-  useEffect(() => {
-    fetchJobs();
-    // eslint-disable-next-line
-  }, [page, statusFilter]);
+    const data = response.data;
+    if (data.success) {
+      setAllJobs(data.data.jobs); // store unfiltered list
+      setTotalPages(data.data.pagination.pages);
+    } else {
+      alert("Failed to load jobs.");
+    }
+  } catch (error) {
+    console.error("Fetch jobs error:", error);
+    alert("Error fetching jobs.");
+  }
+  setLoading(false);
+};
+
+// Apply frontend filtering
+useEffect(() => {
+  let filteredJobs = allJobs;
+
+  // filter by search term (case-insensitive)
+  if (searchTerm.trim()) {
+    filteredJobs = filteredJobs.filter((job) =>
+      job.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
+  // filter by status (if needed in frontend too)
+  if (statusFilter !== "All Status") {
+    filteredJobs = filteredJobs.filter(
+      (job) => job.status === statusFilter.toUpperCase()
+    );
+  }
+
+  setJobs(filteredJobs);
+}, [searchTerm, statusFilter, allJobs]);
+
+useEffect(() => {
+  fetchJobs();
+  // eslint-disable-next-line
+}, [page]);
 
   const handleSaveJob = async (form: JobForm) => {
     try {
@@ -341,9 +366,9 @@ export default function EmployerJobsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-1">
         {/* Header Section and Sidebar code as you provided... */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 sticky top-0 py-4 z-50 bg-white px-8 shadow rounded-2xl mb-1">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 Job Postings
@@ -365,7 +390,7 @@ export default function EmployerJobsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Search and Filter Section */}
           <div className="lg:col-span-1">
-            <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-6 sticky top-8">
+            <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-6 sticky top-28">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <FiSearch className="text-blue-600" />
