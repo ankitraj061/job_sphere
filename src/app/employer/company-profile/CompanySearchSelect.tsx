@@ -18,6 +18,11 @@ export default function CompanySearchSelect({ onCancel, onSelect }: CompanySearc
  const fetchCompanies = async (query = '') => {
   setLoading(true);
   try {
+    if(query.length < 3){
+      setCompanies([]); 
+      return
+      
+    }
     const res = await axios.get(
       `${backendUrl}/api/employer/companies/search?q=${encodeURIComponent(query)}`
     );

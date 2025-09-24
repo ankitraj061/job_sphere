@@ -44,6 +44,7 @@ export function useMyCompany() {
         }
       } catch (err) {
         setError(err as Error);
+        console.log(err);
       } finally {
         setLoading(false);
       }
