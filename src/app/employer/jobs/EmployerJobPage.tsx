@@ -13,6 +13,11 @@ import {
   FiPlayCircle,
   FiPauseCircle,
   FiCheckCircle,
+  FiSearch,
+  FiFilter,
+  FiCalendar,
+  FiBriefcase,
+  FiEye,
 } from "react-icons/fi";
 import { MdOutlineCreateNewFolder } from "react-icons/md";
 import JobCreateModal from "./JobCreateModal";
@@ -33,34 +38,46 @@ function JobFormPreviewModal({
   if (!open || !fields) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4">
-      <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-auto p-6">
-        <h2 className="text-2xl font-semibold mb-4">Job Form Preview</h2>
-        <div className="space-y-4">
-          {fields.map((field) => (
-            <div key={field.id} className="border rounded p-4 bg-gray-50">
-              <div className="font-medium">{field.label}</div>
-              <div className="text-sm text-gray-600">
-                Type: {field.fieldType}
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-60 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-auto shadow-2xl">
+        <div className="sticky top-0 bg-white border-b border-gray-100 p-6 rounded-t-2xl">
+          <h2 className="text-2xl font-bold text-gray-900">Job Form Preview</h2>
+          <p className="text-gray-600 mt-1">Preview how the form will appear to applicants</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {fields.map((field, index) => (
+            <div key={field.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:shadow-sm transition-shadow">
+              <div className="flex items-start justify-between mb-2">
+                <div className="font-semibold text-gray-900 flex items-center gap-2">
+                  <span className="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full font-medium">{index + 1}</span>
+                  {field.label}
+                  {field.isRequired && (
+                    <span className="text-red-500 text-sm">*</span>
+                  )}
+                </div>
+                <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-medium">
+                  {field.fieldType}
+                </span>
               </div>
               {field.options && field.options.length > 0 && (
-                <div className="mt-1 text-sm">
-                  Options: {field.options.join(", ")}
+                <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Available options:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {field.options.map((option, optIndex) => (
+                      <span key={optIndex} className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-md border border-blue-200">{option}</span>
+                    ))}
+                  </div>
                 </div>
-              )}
-              {field.isRequired && ( // Fixed: changed from 'required' to 'isRequired'
-                <div className="mt-1 text-sm text-red-600">* Required</div>
               )}
             </div>
           ))}
         </div>
-
-        <div className="flex justify-end mt-6">
+        <div className="sticky bottom-0 bg-white border-t border-gray-100 p-6 rounded-b-2xl">
           <button
             onClick={onClose}
-            className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="w-full px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold"
           >
-            Close
+            Close Preview
           </button>
         </div>
       </div>
@@ -70,68 +87,82 @@ function JobFormPreviewModal({
 
 export default function EmployerJobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Dropdown state
   const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
-
-  // Job Create/Edit Modal
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
-
-  // Job Form Modal
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [currentJobId, setCurrentJobId] = useState<number | null>(null);
   const [editingJobForm, setEditingJobForm] = useState<JobFormField[] | null>(null);
-
-  // Status Update Modal
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [statusUpdateJob, setStatusUpdateJob] = useState<Job | null>(null);
-
-  // Delete Confirmation Modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
-
-  // Preview job
   const [previewFormOpen, setPreviewFormOpen] = useState(false);
   const [previewFormFields, setPreviewFormFields] = useState<JobFormField[] | null>(null);
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const params: { page?: number; search?: string; status?: string } = { page };
-      if (searchTerm.trim()) params.search = searchTerm.trim();
-      if (statusFilter !== "All Status")
-        params.status = statusFilter.toUpperCase();
+ const fetchJobs = async () => {
+  setLoading(true);
+  try {
+    const params: { page?: number; status?: string } = { page };
+    if (statusFilter !== "All Status") {
+      params.status = statusFilter.toUpperCase();
+    }
 
-      const response = await axios.get<ApiResponse<JobsResponse>>(`${backendUrl}/api/jobs/employer`, {
+    const response = await axios.get<ApiResponse<JobsResponse>>(
+      `${backendUrl}/api/jobs/employer`,
+      {
         params,
         withCredentials: true,
-      });
-
-      const data = response.data;
-      if (data.success) {
-        setJobs(data.data.jobs);
-        setTotalPages(data.data.pagination.pages);
-      } else {
-        alert("Failed to load jobs.");
       }
-    } catch (error) {
-      console.error("Fetch jobs error:", error);
-      alert("Error fetching jobs.");
+    );
+
+    const data = response.data;
+    if (data.success) {
+      setAllJobs(data.data.jobs); // store unfiltered list
+      setTotalPages(data.data.pagination.pages);
+    } else {
+      alert("Failed to load jobs.");
     }
-    setLoading(false);
-  };
+  } catch (error) {
+    console.error("Fetch jobs error:", error);
+    alert("Error fetching jobs.");
+  }
+  setLoading(false);
+};
 
-  useEffect(() => {
-    fetchJobs();
-  }, [page, statusFilter]);
+// Apply frontend filtering
+useEffect(() => {
+  let filteredJobs = allJobs;
 
-  // ✅ Create OR Update Job
+  // filter by search term (case-insensitive)
+  if (searchTerm.trim()) {
+    filteredJobs = filteredJobs.filter((job) =>
+      job.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }
+
+  // filter by status (if needed in frontend too)
+  if (statusFilter !== "All Status") {
+    filteredJobs = filteredJobs.filter(
+      (job) => job.status === statusFilter.toUpperCase()
+    );
+  }
+
+  setJobs(filteredJobs);
+}, [searchTerm, statusFilter, allJobs]);
+
+useEffect(() => {
+  fetchJobs();
+  // eslint-disable-next-line
+}, [page]);
+
   const handleSaveJob = async (form: JobForm) => {
     try {
       const payload = {
@@ -143,7 +174,7 @@ export default function EmployerJobsPage() {
         jobType: form.jobType,
         salaryMin: form.salaryMin ? Number(form.salaryMin) : null,
         salaryMax: form.salaryMax ? Number(form.salaryMax) : null,
-        noOfOpenings: form.noOfOpenings ? Number(form.noOfOpenings) : 1, // Fixed: changed from 'openings'
+        noOfOpenings: form.noOfOpenings ? Number(form.noOfOpenings) : 1,
       };
 
       let response;
@@ -173,7 +204,6 @@ export default function EmployerJobsPage() {
     }
   };
 
-  // ✅ Update Job Status
   const handleUpdateJobStatus = async (jobId: number, newStatus: string) => {
     try {
       const response = await axios.patch<ApiResponse<Job>>(
@@ -181,7 +211,6 @@ export default function EmployerJobsPage() {
         { status: newStatus },
         { withCredentials: true }
       );
-
       if (response.data.success) {
         alert("Job status updated successfully!");
         fetchJobs();
@@ -196,13 +225,11 @@ export default function EmployerJobsPage() {
     }
   };
 
-  // ✅ Delete Job
   const handleDeleteJob = async (jobId: number) => {
     try {
       const response = await axios.delete<ApiResponse<{ message: string }>>(`${backendUrl}/api/jobs/${jobId}`, {
         withCredentials: true,
       });
-
       if (response.data.success) {
         alert("Job deleted successfully!");
         fetchJobs();
@@ -217,13 +244,11 @@ export default function EmployerJobsPage() {
     }
   };
 
-  // ✅ Fetch Job Form
   const fetchJobForm = async (jobId: number): Promise<JobFormField[]> => {
     try {
       const response = await axios.get<ApiResponse<JobFormResponse>>(`${backendUrl}/api/jobs/${jobId}/form`, {
         withCredentials: true,
       });
-
       if (response.data.success) {
         return response.data.data.fields || [];
       }
@@ -234,37 +259,30 @@ export default function EmployerJobsPage() {
     }
   };
 
-  // ✅ Job Form Save/Update
   const handleSaveJobForm = async (fields: JobFormField[]) => {
     if (!currentJobId) return;
-    
     try {
-      // Convert fields to match API request format
       const apiFields = fields.map(field => ({
         label: field.label,
         fieldType: field.fieldType,
-        isRequired: field.isRequired, // Use isRequired instead of required
+        isRequired: field.isRequired,
         order: field.order,
         options: field.options || []
       }));
-
       let response;
       if (editingJobForm) {
-        // Update existing form
         response = await axios.put<ApiResponse<JobFormResponse>>(
           `${backendUrl}/api/jobs/${currentJobId}/form`,
           { fields: apiFields },
           { withCredentials: true }
         );
       } else {
-        // Create new form
         response = await axios.post<ApiResponse<JobFormResponse>>(
           `${backendUrl}/api/jobs/${currentJobId}/form`,
           { fields: apiFields },
           { withCredentials: true }
         );
       }
-
       if (response.data.success) {
         alert(editingJobForm ? "Job form updated successfully!" : "Job form created successfully!");
         setFormModalOpen(false);
@@ -278,17 +296,14 @@ export default function EmployerJobsPage() {
     }
   };
 
-  // ✅ Delete Job Form Field
   const handleDeleteJobFormField = async (jobId: number, fieldId: number) => {
     try {
       const response = await axios.delete<ApiResponse<{ message: string }>>(
         `${backendUrl}/api/jobs/${jobId}/form/field/${fieldId}`,
         { withCredentials: true }
       );
-
       if (response.data.success) {
         alert("Job form field deleted successfully!");
-        // Refresh the form if it's currently open
         if (formModalOpen && currentJobId === jobId) {
           const updatedFields = await fetchJobForm(jobId);
           setEditingJobForm(updatedFields);
@@ -306,17 +321,14 @@ export default function EmployerJobsPage() {
     setDropdownOpen(dropdownOpen === jobId ? null : jobId);
   };
 
-  // Handle opening job form modal for editing
   const handleOpenJobFormModal = async (jobId: number, isEdit: boolean = false) => {
     setCurrentJobId(jobId);
-    
     if (isEdit) {
       const existingFields = await fetchJobForm(jobId);
       setEditingJobForm(existingFields);
     } else {
       setEditingJobForm(null);
     }
-    
     setFormModalOpen(true);
     setDropdownOpen(null);
   };
@@ -332,338 +344,519 @@ export default function EmployerJobsPage() {
     setDropdownOpen(null);
   };
 
+  const formatSalary = (min: number | null, max: number | null) => {
+    if (!min && !max) return "Salary not disclosed";
+    if (!min) return `Up to ₹${(max! / 1000).toFixed(0)}k`;
+    if (!max) return `From ₹${(min / 1000).toFixed(0)}k`;
+    return `₹${(min / 1000).toFixed(0)}k - ₹${(max / 1000).toFixed(0)}k`;
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "ACTIVE":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "PAUSED":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "COMPLETED":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-10">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h1 className="text-3xl font-bold text-gray-900">Job Postings</h1>
-          <div className="flex gap-4 flex-wrap w-full md:w-auto md:flex-nowrap items-center">
-            <input
-              type="text"
-              placeholder="Search jobs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="rounded-xl px-4 py-3 bg-gray-50 border-none focus:ring-2 focus:ring-blue-500 shadow transition-all text-lg"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="max-w-7xl mx-auto px-4 py-1">
+        {/* Header Section and Sidebar code as you provided... */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 sticky top-0 py-4 z-50 bg-white px-8 shadow rounded-2xl mb-1">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Job Postings
+              </h1>
+              <p className="text-gray-600 mt-2">Manage your job listings and applications</p>
+            </div>
+            
             <button
-              onClick={() => {
-                setPage(1);
-                fetchJobs();
-              }}
-              className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg font-semibold transition"
-            >
-              Search
-            </button>
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
-              className="rounded-xl px-4 py-3 bg-gray-50 border-none focus:ring-2 focus:ring-blue-500 text-lg shadow transition"
-            >
-              <option value="All Status">All Status</option>
-              <option value="ACTIVE">Active</option>
-              <option value="PAUSED">Paused</option>
-              <option value="COMPLETED">Completed</option>
-            </select>
-            <button
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg font-semibold transition"
+              className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-200 font-semibold"
               onClick={() => {
                 setEditingJob(null);
                 setDrawerOpen(true);
               }}
             >
-              <FiPlus /> Create Job Posting
+              <FiPlus className="text-xl" />
+              Create New Job
             </button>
-          </div>
-        </div>
-
-        {/* Job List */}
-        {loading ? (
-          <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="flex items-center gap-4 bg-white/80 p-8 rounded-2xl shadow-lg border border-white/20">
-              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-gray-700 text-lg font-semibold">Loading jobs...</p>
-            </div>
-          </div>
-        ) : jobs.length === 0 ? (
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-12 mt-8 text-center">
-            <div className="mx-auto mb-6 w-24 h-24 flex items-center justify-center rounded-xl bg-blue-100">
-              <FiUsers className="w-12 h-12 text-blue-400" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">No jobs found</h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              There are no jobs to show. Adjust your search or create a new posting.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {jobs.map((job) => (
-              <div
-                key={job.id}
-                className={`bg-white/90 backdrop-blur-sm border border-white/30 rounded-2xl shadow-xl p-6 grid grid-cols-1 md:grid-cols-3 gap-8 hover:shadow-2xl transition-all ${
-                  dropdownOpen === job.id ? 'relative z-50' : 'relative'
-                }`}
-              >
-                <div className="md:col-span-2">
-                  <h2 className="text-xl font-bold text-gray-900 mb-1">{job.title}</h2>
-                  <div className="flex flex-wrap gap-4 text-gray-500 text-sm mb-2">
-                    <span>{job.role || "-"}</span>
-                    {job.location && (
-                      <span className="flex items-center gap-1">
-                        <FiMapPin className="text-blue-400" /> {job.location}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-gray-700 mt-2 line-clamp-2">{job.description}</p>
-                  <div className="flex flex-wrap gap-3 mt-4">
-                    <span className="flex items-center gap-1 bg-blue-50 px-3 py-1 rounded-lg font-medium text-blue-700">
-                      <FiDollarSign className="text-blue-400" />
-                      {job.salaryMin ? job.salaryMin / 1000 + "k" : "N/A"} -{" "}
-                      {job.salaryMax ? job.salaryMax / 1000 + "k" : "N/A"}
-                    </span>
-                    <span className="flex items-center gap-1 bg-purple-50 px-3 py-1 rounded-lg font-medium text-purple-700">
-                      <FiUsers className="text-purple-400" />
-                      {job.totalApplications} applicants
-                    </span>
-                    <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-blue-200 to-indigo-200 text-blue-700">
-                      {job.jobType.replace("_", "-")}
-                    </span>
-                    <span
-                      className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                        job.status === "ACTIVE"
-                          ? "bg-blue-600 text-white"
-                          : job.status === "PAUSED"
-                          ? "bg-yellow-400 text-black"
-                          : "bg-gray-300 text-gray-700"
-                      }`}
-                    >
-                      {job.status.charAt(0).toUpperCase() +
-                        job.status.slice(1).toLowerCase()}
-                    </span>
+        </div>  
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Search and Filter Section */}
+          <div className="lg:col-span-1">
+            <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-6 sticky top-28">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <FiSearch className="text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900">Search & Filter</h3>
+              </div>
+              
+              <div className="space-y-6">
+                {/* Search Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Search Jobs
+                  </label>
+                  <div className="relative">
+                    <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search by title, role..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50  text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    />
                   </div>
                 </div>
 
-                {/* Actions Dropdown */}
-                <div className="flex flex-col gap-2 items-end justify-start">
-                  <button
-                    onClick={() => toggleDropdown(job.id)}
-                    className="p-2 rounded-full hover:bg-blue-50 transition relative z-10"
-                  >
-                    <FiMoreVertical className="w-6 h-6 text-gray-700" />
-                  </button>
-                  {dropdownOpen === job.id && (
-                    <div className="absolute right-0 top-12 w-56 bg-white/95 border border-blue-100 rounded-xl shadow-2xl z-[60] overflow-hidden">
-                      <ul className="text-sm text-gray-700 divide-y">
-                        <li
-                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-blue-50 transition"
-                          onClick={() => {
-                            setEditingJob(job);
-                            setDrawerOpen(true);
-                            setDropdownOpen(null);
-                          }}
-                        >
-                          <span className="inline-flex w-8 h-8 items-center justify-center bg-blue-500 rounded-xl shadow">
-                            <FiEdit className="text-white" />
-                          </span>
-                          Update Job
-                        </li>
-                        <li
-                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-green-50 transition"
-                          onClick={() => {
-                            setStatusUpdateJob(job);
-                            setStatusModalOpen(true);
-                            setDropdownOpen(null);
-                          }}
-                        >
-                          <span className="inline-flex w-8 h-8 items-center justify-center bg-green-500 rounded-xl shadow">
-                            <FiPlayCircle className="text-white" />
-                          </span>
-                          Update Job Status
-                        </li>
-                        <li
-                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer text-red-600 hover:bg-red-50 transition"
-                          onClick={() => {
-                            setJobToDelete(job);
-                            setDeleteModalOpen(true);
-                            setDropdownOpen(null);
-                          }}
-                        >
-                          <span className="inline-flex w-8 h-8 items-center justify-center bg-red-500 rounded-xl shadow">
-                            <FiTrash2 className="text-white" />
-                          </span>
-                          Delete Job
-                        </li>
-                        <li
-                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-purple-50 transition"
-                          onClick={() => handleOpenJobFormModal(job.id, false)}
-                        >
-                          <span className="inline-flex w-8 h-8 items-center justify-center bg-purple-500 rounded-xl shadow">
-                            <MdOutlineCreateNewFolder className="text-white" />
-                          </span>
-                          Create Job Form
-                        </li>
-                        <li
-                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-blue-50 transition"
-                          onClick={() => handleOpenJobFormModal(job.id, true)}
-                        >
-                          <span className="inline-flex w-8 h-8 items-center justify-center bg-blue-500 rounded-xl shadow">
-                            <FiEdit className="text-white" />
-                          </span>
-                          Update Job Form
-                        </li>
-                        <li
-                          className="px-4 py-3 flex items-center gap-3 font-medium cursor-pointer hover:bg-gray-50 transition"
-                          onClick={() => handlePreviewJobForm(job.id)}
-                        >
-                          <span className="inline-flex w-8 h-8 items-center justify-center bg-indigo-500 rounded-xl shadow">
-                            <FiUsers className="text-white" />
-                          </span>
-                          Preview Job Form
-                        </li>
-                      </ul>
-                    </div>
-                  )}
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <div className="relative">
+                    <FiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => {
+                        setStatusFilter(e.target.value);
+                        setPage(1);
+                      }}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50  text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="All Status">All Status</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="PAUSED">Paused</option>
+                      <option value="COMPLETED">Completed</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Search Button */}
+                <button
+                  onClick={() => {
+                    setPage(1);
+                    fetchJobs();
+                  }}
+                  className="w-full py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2"
+                >
+                  <FiSearch />
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* Jobs List */}
+          <div className="lg:col-span-3">
+            {loading ? (
+              /* ... (your loading JSX here) ... */
+              <div className="flex items-center justify-center min-h-[50vh]">
+                <div className="text-center">
+                  <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-gray-600 text-lg font-medium">Loading your jobs...</p>
                 </div>
               </div>
-            ))}
+            ) : jobs.length === 0 ? (
+              /* ... (your empty state JSX here) ... */
+              <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-12 text-center">
+                <div className="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <FiBriefcase className="w-12 h-12 text-gray-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">No jobs found</h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  {searchTerm || statusFilter !== "All Status" 
+                    ? "No jobs match your current filters. Try adjusting your search criteria."
+                    : "You haven't created any job postings yet. Create your first job to get started."
+                  }
+                </p>
+                <button
+                  onClick={() => {
+                    setEditingJob(null);
+                    setDrawerOpen(true);
+                  }}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold"
+                >
+                  Create Your First Job
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {jobs.map((job) => (
+                  <div
+                    key={job.id}
+                    className="bg-white/90 backdrop-blur-lg border border-white/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden group"
+                  >
+                    <div className="p-6">
+                      {/* Top Row */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white">
+                              <FiBriefcase className="w-5 h-5" />
+                            </div>
+                            <div className="flex flex-col">
+                              <div className="text-sm text-gray-500">
+                                Posted {new Date(job.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {/* Actions Dropdown */}
+                        <div className="relative">
+                          <button
+                            onClick={() => toggleDropdown(job.id)}
+                            className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+                          >
+                            <FiMoreVertical className="w-5 h-5 text-gray-600" />
+                          </button>
+                          {dropdownOpen === job.id && (
+                            <div className="absolute right-10 top-0 w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                              <div className="py-0">
+                                <button
+                                  className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-blue-50 transition-colors"
+                                  onClick={() => {
+                                    setEditingJob(job);
+                                    setDrawerOpen(true);
+                                    setDropdownOpen(null);
+                                  }}
+                                >
+                                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <FiEdit className="w-4 h-4 text-blue-600" />
+                                  </div>
+                                  <span className="font-medium text-gray-700">Update Job</span>
+                                </button>
+                                <button
+                                  className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-green-50 transition-colors"
+                                  onClick={() => {
+                                    setStatusUpdateJob(job);
+                                    setStatusModalOpen(true);
+                                    setDropdownOpen(null);
+                                  }}
+                                >
+                                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <FiPlayCircle className="w-4 h-4 text-green-600" />
+                                  </div>
+                                  <span className="font-medium text-gray-700">Update Status</span>
+                                </button>
+                                <button
+                                  className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-purple-50 transition-colors"
+                                  onClick={() => handleOpenJobFormModal(job.id, false)}
+                                >
+                                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <MdOutlineCreateNewFolder className="w-4 h-4 text-purple-600" />
+                                  </div>
+                                  <span className="font-medium text-gray-700">Create Form</span>
+                                </button>
+                                <button
+                                  className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-indigo-50 transition-colors"
+                                  onClick={() => handleOpenJobFormModal(job.id, true)}
+                                >
+                                  <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                    <FiEdit className="w-4 h-4 text-indigo-600" />
+                                  </div>
+                                  <span className="font-medium text-gray-700">Update Form</span>
+                                </button>
+                                <button
+                                  className="w-full px-4 py-2 flex items-center gap-3 text-left hover:bg-gray-50 transition-colors"
+                                  onClick={() => handlePreviewJobForm(job.id)}
+                                >
+                                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <FiEye className="w-4 h-4 text-gray-600" />
+                                  </div>
+                                  <span className="font-medium text-gray-700">Preview Form</span>
+                                </button>
+                                <hr className="my-2" />
+                                <button
+                                  className="w-full px-4 pb-2 flex items-center gap-3 text-left hover:bg-red-50 transition-colors text-red-600"
+                                  onClick={() => {
+                                    setJobToDelete(job);
+                                    setDeleteModalOpen(true);
+                                    setDropdownOpen(null);
+                                  }}
+                                >
+                                  <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <FiTrash2 className="w-4 h-4 text-red-600" />
+                                  </div>
+                                  <span className="font-medium">Delete Job</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {/* Job Info */}
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                          {job.title}
+                        </h3>
+                        {job.role && (
+                          <p className="text-gray-600 font-medium mb-2">{job.role}</p>
+                        )}
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          {job.location && (
+                            <span className="flex items-center gap-1">
+                              <FiMapPin className="text-blue-500" />
+                              {job.location}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <FiCalendar className="text-blue-500" />
+                            {new Date(job.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-gray-700 leading-relaxed mb-6 line-clamp-3">
+                        {job.description}
+                      </p>
+                      {/* Stat Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                              <FiDollarSign className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Salary Range</p>
+                              <p className="font-semibold text-blue-900">{formatSalary(job.salaryMin ?? 0, job.salaryMax ?? 0)}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-green-50 rounded-xl p-4 border border-green-100">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-green-100 rounded-lg">
+                              <FiUsers className="w-4 h-4 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-green-600 uppercase tracking-wide">Applications</p>
+                              <p className="font-semibold text-green-900">{job.totalApplications}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-purple-50 rounded-xl p-4 border border-purple-100">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-purple-100 rounded-lg">
+                              <FiBriefcase className="w-4 h-4 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-purple-600 uppercase tracking-wide">Openings</p>
+                              <p className="font-semibold text-purple-900">{job.noOfOpenings}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Job Footer */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(job.status)}`}>
+                            {job.status.charAt(0).toUpperCase() + job.status.slice(1).toLowerCase()}
+                          </span>
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                            {job.jobType.replace("_", " ")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {/* PAGINATION CODE HERE (as in your sample) */}
+                {totalPages > 1 && (
+                  <div className="mt-8">
+                    <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-6">
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={() => setPage(Math.max(1, page - 1))}
+                          disabled={page === 1}
+                          className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          ← Previous
+                        </button>
+                        <div className="flex items-center gap-2">
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            let pageNum;
+                            if (totalPages <= 5) {
+                              pageNum = i + 1;
+                            } else if (page <= 3) {
+                              pageNum = i + 1;
+                            } else if (page >= totalPages - 2) {
+                              pageNum = totalPages - 4 + i;
+                            } else {
+                              pageNum = page - 2 + i;
+                            }
+                            return (
+                              <button
+                                key={pageNum}
+                                onClick={() => setPage(pageNum)}
+                                className={`w-10 h-10 rounded-xl font-semibold transition-colors ${
+                                  page === pageNum
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                              >
+                                {pageNum}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <button
+                          onClick={() => setPage(Math.min(totalPages, page + 1))}
+                          disabled={page === totalPages}
+                          className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next →
+                        </button>
+                      </div>
+                      <div className="mt-4 text-center text-sm text-gray-600">
+                        Showing page {page} of {totalPages} ({jobs.length} jobs)
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            {/* MODALS */}
+            <JobCreateModal
+              open={drawerOpen}
+              onClose={() => {
+                setDrawerOpen(false);
+                setEditingJob(null);
+              }}
+              onSave={handleSaveJob}
+              editingJob={editingJob}
+            />
+            <JobFormModal
+              open={formModalOpen}
+              onClose={() => {
+                setFormModalOpen(false);
+                setEditingJobForm(null);
+              }}
+              onSave={handleSaveJobForm}
+              existingFields={editingJobForm}
+              jobId={currentJobId}
+              onDeleteField={handleDeleteJobFormField}
+            />
+            <JobFormPreviewModal
+              open={previewFormOpen}
+              onClose={() => {
+                setPreviewFormOpen(false);
+                setPreviewFormFields(null);
+              }}
+              fields={previewFormFields}
+            />
+            {/* Status Modal */}
+            {statusModalOpen && statusUpdateJob && (
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+                  {/* ... status modal UI as before ... */}
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <FiPlayCircle className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Update Job Status</h3>
+                    <p className="text-gray-600">
+                      Change status for "<span className="font-semibold">{statusUpdateJob.title}</span>"
+                    </p>
+                  </div>
+                  <div className="space-y-3 mb-6">
+                    <button
+                      onClick={() => handleUpdateJobStatus(statusUpdateJob.id, "ACTIVE")}
+                      disabled={statusUpdateJob.status === "ACTIVE"}
+                      className="w-full flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                        <FiPlayCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-green-900">Set as Active</p>
+                        <p className="text-sm text-green-600">Job will be visible to candidates</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleUpdateJobStatus(statusUpdateJob.id, "PAUSED")}
+                      disabled={statusUpdateJob.status === "PAUSED"}
+                      className="w-full flex items-center gap-3 px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-xl hover:bg-yellow-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div className="w-10 h-10 bg-yellow-500 rounded-xl flex items-center justify-center">
+                        <FiPauseCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-yellow-900">Set as Paused</p>
+                        <p className="text-sm text-yellow-600">Temporarily hide from candidates</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleUpdateJobStatus(statusUpdateJob.id, "COMPLETED")}
+                      disabled={statusUpdateJob.status === "COMPLETED"}
+                      className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div className="w-10 h-10 bg-gray-500 rounded-xl flex items-center justify-center">
+                        <FiCheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-gray-900">Set as Completed</p>
+                        <p className="text-sm text-gray-600">Mark as filled/closed</p>
+                      </div>
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setStatusModalOpen(false);
+                      setStatusUpdateJob(null);
+                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-semibold text-gray-700"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+            {/* Delete Modal */}
+            {deleteModalOpen && jobToDelete && (
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <FiTrash2 className="w-8 h-8 text-red-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-red-600 mb-2">Delete Job</h3>
+                    <p className="text-gray-600 mb-4">
+                      Are you sure you want to delete "<span className="font-semibold">{jobToDelete.title}</span>"?
+                    </p>
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                      <p className="text-sm text-red-700">
+                        <strong>Warning:</strong> This action cannot be undone. All applications and related data will be permanently deleted.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setDeleteModalOpen(false);
+                        setJobToDelete(null);
+                      }}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-semibold text-gray-700"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleDeleteJob(jobToDelete.id)}
+                      className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold"
+                    >
+                      Delete Job
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-3 mt-10 bg-white/80 rounded-xl shadow-lg p-4 border border-white/20">
-            <button
-              onClick={() => setPage(Math.max(1, page - 1))}
-              disabled={page === 1}
-              className="px-6 py-2 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition disabled:opacity-40"
-            >
-              Previous
-            </button>
-            <span className="px-4 py-2 font-bold text-blue-700 rounded-lg">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => setPage(Math.min(totalPages, page + 1))}
-              disabled={page === totalPages}
-              className="px-6 py-2 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        )}
+        </div>
       </div>
-
-      {/* Job Create/Edit Modal */}
-      <JobCreateModal
-        open={drawerOpen}
-        onClose={() => {
-          setDrawerOpen(false);
-          setEditingJob(null);
-        }}
-        onSave={handleSaveJob}
-        editingJob={editingJob}
-      />
-
-      {/* Job Form Modal */}
-      <JobFormModal
-        open={formModalOpen}
-        onClose={() => {
-          setFormModalOpen(false);
-          setEditingJobForm(null);
-        }}
-        onSave={handleSaveJobForm}
-        existingFields={editingJobForm}
-        jobId={currentJobId}
-        onDeleteField={handleDeleteJobFormField}
-      />
-
-      <JobFormPreviewModal
-        open={previewFormOpen}
-        onClose={() => {
-          setPreviewFormOpen(false);
-          setPreviewFormFields(null);
-        }}
-        fields={previewFormFields}
-      />
-
-      {/* Status Update Modal */}
-      {statusModalOpen && statusUpdateJob && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">Update Job Status</h3>
-            <p className="text-gray-600 mb-4">
-              Update status for &quot;{statusUpdateJob.title}&quot;
-            </p>
-            <div className="flex flex-col gap-3">
-              <button
-                onClick={() => handleUpdateJobStatus(statusUpdateJob.id, "ACTIVE")}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                disabled={statusUpdateJob.status === "ACTIVE"}
-              >
-                <FiPlayCircle />
-                Set as Active
-              </button>
-              <button
-                onClick={() => handleUpdateJobStatus(statusUpdateJob.id, "PAUSED")}
-                className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                disabled={statusUpdateJob.status === "PAUSED"}
-              >
-                <FiPauseCircle />
-                Set as Paused
-              </button>
-              <button
-                onClick={() => handleUpdateJobStatus(statusUpdateJob.id, "COMPLETED")}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                disabled={statusUpdateJob.status === "COMPLETED"}
-              >
-                <FiCheckCircle />
-                Set as Completed
-              </button>
-              <button
-                onClick={() => {
-                  setStatusModalOpen(false);
-                  setStatusUpdateJob(null);
-                }}
-                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deleteModalOpen && jobToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4 text-red-600">Delete Job</h3>
-            <p className="text-gray-600 mb-4">
-              Are you sure you want to delete &quot;{jobToDelete.title}&quot;? This action cannot be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => {
-                  setDeleteModalOpen(false);
-                  setJobToDelete(null);
-                }}
-                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDeleteJob(jobToDelete.id)}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

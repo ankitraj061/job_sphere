@@ -28,7 +28,7 @@ export default function EmployerProfileView({ profile }: Props) {
   return (
     <div className="min-w-full min-h-screen space-y-6 px-4 py-4">
       {/* Header */}
-      <h2 className="text-2xl font-extrabold text-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 rounded-3xl py-6 shadow-lg select-none">
+      <h2 className="text-2xl font-extrabold text-center bg-gradient-to-br from-blue-500 via-blue-500 to-indigo-500 rounded-xl py-6 shadow-lg select-none">
         Employer Profile
       </h2>
 
