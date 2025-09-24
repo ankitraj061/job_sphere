@@ -132,11 +132,11 @@ export const JobProviderDashboard: React.FC = () => {
           value={data.insights.averageApplicationsPerJob}
           icon={<TrendingUp className="w-5 h-5 text-blue-600" />}
         />
-        <StatCard
+        {/* <StatCard
           title="Monthly Growth"
           value={`${data.insights.monthlyGrowth}%`}
           icon={<TrendingUp className="w-5 h-5 text-green-600" />}
-        />
+        /> */}
         {/* <StatCard
           title="Most Popular Role"
           value={data.insights.mostPopularRole.replace('_', ' ')}
