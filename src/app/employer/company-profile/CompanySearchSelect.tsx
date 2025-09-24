@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Building2, MapPin, Users, Briefcase } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCompany } from '../hooks/useCompany';
-import { CompanySearchResult, transformSearchResultToCompany,Company } from '../company-profile/types';
+import { CompanySearchResult, transformSearchResultToCompany, Company } from './types';
 
 interface CompanySearchSelectProps {
   onCancel: () => void;
@@ -47,19 +47,37 @@ export default function CompanySearchSelect({ onCancel, onSelect, onCreateNew }:
     
     setSelectedCompanyId(company.id);
     
+    // Show changing company toast message
+    const changingToast = toast.loading(`Changing to ${company.name}...`, {
+      duration: Infinity, // Keep it until we manually dismiss
+    });
+    
     try {
       const selectedCompany = await selectCompany(company.id);
-      toast.success(`Successfully joined ${company.name}!`);
+      
+      // Dismiss the loading toast
+      toast.dismiss(changingToast);
+      
+      // Show success toast
+      toast.success(`Successfully changed to ${company.name}!`, {
+        duration: 4000,
+      });
+      
       onSelect(selectedCompany);
-    } catch (err: unknown) {
-    console.error('Create company error:', err);
+    } catch (error: unknown) {
+  // Dismiss the loading toast
+  toast.dismiss(changingToast);
 
-    if (err instanceof Error) {
-      toast.error(err.message);
-    } else {
-      toast.error('Failed to create company');
-    }
+  // Show error toast
+  if (error instanceof Error) {
+    toast.error(error.message);
+  } else {
+    toast.error('Failed to change company');
   }
+
+  setSelectedCompanyId(null);
+}
+
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,7 +146,7 @@ export default function CompanySearchSelect({ onCancel, onSelect, onCreateNew }:
                     key={company.id}
                     className={`cursor-pointer bg-white/80 backdrop-blur-sm border rounded-xl p-6 transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${
                       selectedCompanyId === company.id 
-                        ? 'border-indigo-500 ring-2 ring-indigo-200 bg-indigo-50/50' 
+                        ? 'border-indigo-500 ring-2 ring-indigo-200 bg-indigo-50/50 opacity-75 pointer-events-none' 
                         : 'border-gray-200 hover:border-indigo-300'
                     }`}
                     onClick={() => handleCompanySelect(company)}
@@ -191,10 +209,16 @@ export default function CompanySearchSelect({ onCancel, onSelect, onCreateNew }:
                       </div>
 
                       {/* Selection Indicator */}
-                      {selectedCompanyId === company.id && (
+                      {selectedCompanyId === company.id ? (
                         <div className="flex-shrink-0">
                           <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-sm">✓</span>
+                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex-shrink-0">
+                          <div className="w-6 h-6 border-2 border-gray-300 rounded-full flex items-center justify-center hover:border-indigo-400 transition-colors">
+                            <span className="text-gray-400 text-sm">→</span>
                           </div>
                         </div>
                       )}

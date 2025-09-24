@@ -14,6 +14,7 @@ export default function CompanyDashboard() {
 
   // Handle company selection from search
   const handleCompanySelect = async (selectedCompany: Company) => {
+    
     try {
       await refetch(); // Refresh to get updated data
       setCurrentView('profile');
