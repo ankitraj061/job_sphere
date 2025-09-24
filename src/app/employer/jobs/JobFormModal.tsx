@@ -152,14 +152,15 @@ export default function JobFormModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+>
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-xl font-bold text-blue-600">
             {existingFields ? "Update Job Form" : "Create Job Form"}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
+          <button onClick={onClose} className="p-2 bg-red-400 hover:bg-red-500 rounded">
             <FiX />
           </button>
         </div>
@@ -169,7 +170,7 @@ export default function JobFormModal({
           {/* Form Fields List */}
           <div className="space-y-4 mb-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">Form Fields</h3>
+              <h3 className="text-lg font-medium text-blue-600">Form Fields</h3>
               <button
                 onClick={handleAddField}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -196,7 +197,7 @@ export default function JobFormModal({
                       >
                         <FiGrid />
                       </button>
-                      <div className="flex-grow">
+                      <div className="flex-grow text-black">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{field.label}</span>
                           {field.isRequired && ( // Changed from 'required' to 'isRequired'
