@@ -86,24 +86,24 @@ export const JobProviderDashboard: React.FC = () => {
 
       {/* Stats Cards */}
       <div className="w-full overflow-x-auto">
-        <div className="min-w-[1200px] grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-          <StatCard
+        <div className="min-w-[1200px] grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {/* <StatCard
             title="Total Jobs"
             value={data.overview.totalJobs}
             icon={<Briefcase className="w-5 h-5 text-blue-600" />}
-          />
+          /> */}
           <StatCard
             title="Active Jobs"
             value={data.overview.activeJobs}
             icon={<CheckCircle className="w-5 h-5 text-green-600" />}
           />
-          <StatCard
+          {/* <StatCard
             title="Total Applicants"
             value={data.overview.totalApplicants}
             icon={<Users className="w-5 h-5 text-purple-600" />}
-          />
+          /> */}
           <StatCard
-            title="This Month"
+            title="This Month Applicants"
             value={data.overview.applicantsThisMonth}
             icon={<Calendar className="w-5 h-5 text-indigo-600" />}
           />
@@ -126,7 +126,7 @@ export const JobProviderDashboard: React.FC = () => {
       </div>
 
       {/* Insights Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard
           title="Avg Applications/Job"
           value={data.insights.averageApplicationsPerJob}
@@ -137,11 +137,11 @@ export const JobProviderDashboard: React.FC = () => {
           value={`${data.insights.monthlyGrowth}%`}
           icon={<TrendingUp className="w-5 h-5 text-green-600" />}
         />
-        <StatCard
+        {/* <StatCard
           title="Most Popular Role"
           value={data.insights.mostPopularRole.replace('_', ' ')}
           icon={<Target className="w-5 h-5 text-purple-600" />}
-        />
+        /> */}
         <StatCard
           title="Response Rate"
           value={`${data.insights.responseRate}%`}

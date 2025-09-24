@@ -3,32 +3,31 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useCompany, useCompanyValidation } from '../hooks/useCompany';
-import { CompanyCreateData, COMPANY_SIZE_OPTIONS , Company} from './types';
+import { Company, CompanyUpdateData, COMPANY_SIZE_OPTIONS } from './types';
 
 interface Props {
+  company: Company;
   onCancel: () => void;
-  onSuccess: (company: Company) => void;
-  isUpdating?: boolean;
-  initialData?: CompanyCreateData;
+  onSuccess: (updatedCompany: Company) => void;
 }
 
-export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = false, initialData }: Props) {
-  const [formData, setFormData] = useState<CompanyCreateData>({
-    name: initialData?.name || '',
-    description: initialData?.description || '',
-    website: initialData?.website || '',
-    industry: initialData?.industry || '',
-    location: initialData?.location || '',
-    size: initialData?.size || undefined,
-    foundedYear: initialData?.foundedYear || undefined,
-    profilePicture: initialData?.profilePicture || '',
+export default function CompanyEditForm({ company, onCancel, onSuccess }: Props) {
+  const [formData, setFormData] = useState<CompanyUpdateData>({
+    name: company.name,
+    description: company.description || '',
+    website: company.website || '',
+    industry: company.industry,
+    location: company.location || '',
+    size: company.size || undefined,
+    foundedYear: company.foundedYear || undefined,
+    profilePicture: company.profilePicture || '',
   });
   
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState(false);
   
-  const { createCompany } = useCompany();
-  const { validateCompanyData } = useCompanyValidation();
+  const { updateCompany } = useCompany();
+  const { validateCompanyUpdate } = useCompanyValidation();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -47,16 +46,15 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
   };
 
   const validateForm = (): boolean => {
-    const validationErrors = validateCompanyData(formData);
     const errorMap: {[key: string]: string} = {};
 
-    if (!formData.name.trim()) {
+    if (!formData.name || !formData.name.trim()) {
       errorMap.name = 'Company name is required';
     } else if (formData.name.trim().length < 2) {
       errorMap.name = 'Company name must be at least 2 characters';
     }
 
-    if (!formData.industry.trim()) {
+    if (!formData.industry || !formData.industry.trim()) {
       errorMap.industry = 'Industry is required';
     }
 
@@ -87,31 +85,55 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      toast.error('Please fix the errors below');
+      return;
+    }
 
-  if (!validateForm()) {
-    toast.error('Please fix the errors below');
-    return;
-  }
+    setLoading(true);
+    
+    try {
+      const cleanData: CompanyUpdateData = {};
+      
+      // Only include fields that have changed
+      if (formData.name && formData.name.trim() !== company.name) {
+        cleanData.name = formData.name.trim();
+      }
+      if (formData.industry && formData.industry.trim() !== company.industry) {
+        cleanData.industry = formData.industry.trim();
+      }
+      if (formData.description !== company.description) {
+        cleanData.description = formData.description?.trim() || undefined;
+      }
+      if (formData.website !== company.website) {
+        cleanData.website = formData.website?.trim() || undefined;
+      }
+      if (formData.location !== company.location) {
+        cleanData.location = formData.location?.trim() || undefined;
+      }
+      if (formData.profilePicture !== company.profilePicture) {
+        cleanData.profilePicture = formData.profilePicture?.trim() || undefined;
+      }
+      if (formData.size !== company.size) {
+        cleanData.size = formData.size;
+      }
+      if (formData.foundedYear !== company.foundedYear) {
+        cleanData.foundedYear = formData.foundedYear;
+      }
 
-  setLoading(true);
+      // Check if any changes were made
+      if (Object.keys(cleanData).length === 0) {
+        toast.info('No changes detected');
+        onCancel();
+        return;
+      }
 
-  try {
-    const cleanData: CompanyCreateData = {
-      name: formData.name.trim(),
-      industry: formData.industry.trim(),
-      description: formData.description?.trim() || undefined,
-      website: formData.website?.trim() || undefined,
-      location: formData.location?.trim() || undefined,
-      profilePicture: formData.profilePicture?.trim() || undefined,
-      size: formData.size || undefined,
-      foundedYear: formData.foundedYear || undefined,
-    };
-
-    const newCompany = await createCompany(cleanData);
-    toast.success(`Successfully created ${newCompany.name}!`);
-    onSuccess(newCompany);
-  } catch (err: unknown) {
+      const updatedCompany = await updateCompany(cleanData);
+      toast.success('Company profile updated successfully!');
+      onSuccess(updatedCompany);
+    } catch (err: unknown) {
     console.error('Create company error:', err);
 
     if (err instanceof Error) {
@@ -120,16 +142,46 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
       toast.error('Failed to create company');
     }
   } finally {
-    setLoading(false);
-  }
-};
+      setLoading(false);
+    }
+  };
 
+  const handleReset = () => {
+    setFormData({
+      name: company.name,
+      description: company.description || '',
+      website: company.website || '',
+      industry: company.industry,
+      location: company.location || '',
+      size: company.size || undefined,
+      foundedYear: company.foundedYear || undefined,
+      profilePicture: company.profilePicture || '',
+    });
+    setErrors({});
+    toast.info('Form reset to original values');
+  };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 px-8 py-6 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-10 rounded-full transform translate-x-12 -translate-y-12"></div>
+        <div className="absolute bottom-0 left-0 w-20 h-20 bg-white opacity-10 rounded-full transform -translate-x-8 translate-y-8"></div>
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold mb-1 flex items-center gap-2">
+              <span className="text-2xl">✏️</span>
+              Edit Company Profile
+            </h2>
+            <p className="text-blue-100">Update your company information</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="p-8 space-y-6">
         {/* Basic Information Section */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-gray-200 shadow-sm">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <span className="text-xl">🏢</span>
             Basic Information
@@ -144,7 +196,7 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
               <input
                 type="text"
                 name="name"
-                value={formData.name}
+                value={formData.name || ''}
                 onChange={handleChange}
                 className={`w-full border rounded-lg px-4 py-3 bg-white/60 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 transition-all placeholder-gray-400 ${
                   errors.name ? "border-red-500 bg-red-50" : "border-gray-300"
@@ -165,7 +217,7 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
               <input
                 type="text"
                 name="industry"
-                value={formData.industry}
+                value={formData.industry || ''}
                 onChange={handleChange}
                 className={`w-full border rounded-lg px-4 py-3 bg-white/60 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 transition-all placeholder-gray-400 ${
                   errors.industry ? "border-red-500 bg-red-50" : "border-gray-300"
@@ -186,7 +238,7 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
               <input
                 type="text"
                 name="location"
-                value={formData.location}
+                value={formData.location || ''}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white/60 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 transition-all placeholder-gray-400"
                 placeholder="e.g. San Francisco, CA"
@@ -238,7 +290,7 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
         </div>
 
         {/* Additional Information Section */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-gray-200 shadow-sm">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <span className="text-xl">📝</span>
             Additional Information
@@ -252,7 +304,7 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
               </label>
               <textarea
                 name="description"
-                value={formData.description}
+                value={formData.description || ''}
                 onChange={handleChange}
                 rows={4}
                 maxLength={1000}
@@ -266,7 +318,7 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
                   <p className="text-red-500 text-sm">{errors.description}</p>
                 )}
                 <p className="text-xs text-gray-500 ml-auto">
-                  {formData.description?.length || 0}/1000 characters
+                  {(formData.description?.length || 0)}/1000 characters
                 </p>
               </div>
             </div>
@@ -279,7 +331,7 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
               <input
                 type="url"
                 name="website"
-                value={formData.website}
+                value={formData.website || ''}
                 onChange={handleChange}
                 className={`w-full border rounded-lg px-4 py-3 bg-white/60 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 transition-all placeholder-gray-400 ${
                   errors.website ? "border-red-500 bg-red-50" : "border-gray-300"
@@ -299,7 +351,7 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
               <input
                 type="url"
                 name="profilePicture"
-                value={formData.profilePicture}
+                value={formData.profilePicture || ''}
                 onChange={handleChange}
                 className={`w-full border rounded-lg px-4 py-3 bg-white/60 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 transition-all placeholder-gray-400 ${
                   errors.profilePicture ? "border-red-500 bg-red-50" : "border-gray-300"
@@ -317,32 +369,44 @@ export default function CompanyCreateForm({ onCancel, onSuccess, isUpdating = fa
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap justify-end gap-4 pt-4">
+        <div className="flex flex-wrap justify-between gap-4 pt-4">
           <button
             type="button"
-            onClick={onCancel}
+            onClick={handleReset}
             disabled={loading}
-            className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-200 transition-all font-semibold disabled:opacity-50"
+            className="px-6 py-3 bg-yellow-100 text-yellow-700 rounded-lg border border-yellow-300 hover:bg-yellow-200 transition-all font-semibold disabled:opacity-50 flex items-center gap-2"
           >
-            Cancel
+            <span className="text-lg">🔄</span>
+            Reset Form
           </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 font-semibold transition-all duration-200 shadow-lg disabled:opacity-50 flex items-center gap-2"
-          >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Creating...
-              </>
-            ) : (
-              <>
-                <span className="text-lg">🚀</span>
-                Create Company
-              </>
-            )}
-          </button>
+          
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={loading}
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-200 transition-all font-semibold disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 font-semibold transition-all duration-200 shadow-lg disabled:opacity-50 flex items-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <span className="text-lg">💾</span>
+                  Save Changes
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </form>
     </div>
