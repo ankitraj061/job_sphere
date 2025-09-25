@@ -471,9 +471,9 @@ const handleSaveJobForm = async (fields: JobFormField[]): Promise<void> => {
 
   const formatSalary = (min: number | null, max: number | null) => {
     if (!min && !max) return "Salary not disclosed";
-    if (!min) return `Up to $${(max! / 1000).toFixed(0)}k`;
-    if (!max) return `From $${(min / 1000).toFixed(0)}k`;
-    return `$${(min / 1000).toFixed(0)}k - $${(max / 1000).toFixed(0)}k`;
+    if (!min) return `Up to ₹${(max! / 1000).toFixed(0)}k`;
+    if (!max) return `From ₹${(min / 1000).toFixed(0)}k`;
+    return `₹${(min / 1000).toFixed(0)}k - ₹${(max / 1000).toFixed(0)}k`;
   };
 
   const getStatusColor = (status: string) => {
