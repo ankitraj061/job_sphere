@@ -195,30 +195,53 @@ export default function EmployerJobsPage() {
   const [previewFormOpen, setPreviewFormOpen] = useState(false);
   const [previewFormFields, setPreviewFormFields] = useState<JobFormField[] | null>(null);
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const params: { page?: number; status?: string } = { page };
-      if (statusFilter !== "All Status") {
-        params.status = statusFilter.toUpperCase();
-      }
-      const response = await axios.get<ApiResponse<JobsResponse>>(
+const fetchJobs = async () => {
+  setLoading(true);
+  try {
+    await toast.promise(
+      axios.get<ApiResponse<JobsResponse>>(
         `${backendUrl}/api/jobs/employer`,
-        { params, withCredentials: true }
-      );
-      const data = response.data;
-      if (data.success) {
-        setAllJobs(data.data.jobs);
-        setTotalPages(data.data.pagination.pages);
-      } else {
-        alert("Failed to load jobs.");
+        {
+          params: statusFilter !== "All Status" 
+            ? { page, status: statusFilter.toUpperCase() } 
+            : { page },
+          withCredentials: true,
+        }
+      ),
+      {
+        loading: "Fetching jobs... ⏳",
+        success: (response) => {
+          const data = response.data;
+          if (data.success) {
+            setAllJobs(data.data.jobs);
+            setTotalPages(data.data.pagination.pages);
+            return `Loaded ${data.data.jobs.length} jobs successfully ✅`;
+          } else {
+            throw new Error("Failed to load jobs");
+          }
+        },
+        error: (err) => {
+          let errorMessage = "Error fetching jobs ❌";
+          if (axios.isAxiosError(err)) {
+            if (err.code === "ECONNABORTED") {
+              errorMessage = "Request timed out. Please try again.";
+            } else if (err.response) {
+              errorMessage = `Server error: ${err.response.status}`;
+            } else if (err.request) {
+              errorMessage = "Network error. Please check your connection.";
+            }
+          } else if (err instanceof Error) {
+            errorMessage = err.message;
+          }
+          return errorMessage;
+        },
       }
-    } catch (error) {
-      console.error("Fetch jobs error:", error);
-      alert("Error fetching jobs.");
-    }
+    );
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   useEffect(() => {
     let filteredJobs = allJobs;

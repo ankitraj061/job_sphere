@@ -60,61 +60,72 @@ export default function JobApplicantsPage() {
   const [updatingStatusId, setUpdatingStatusId] = useState<number | null>(null);
 
   // Fetch jobs
-  useEffect(() => {
-    async function fetchJobs() {
-      setLoadingJobs(true);
-      try {
-        const response = await axios.get(`${backendUrl}/api/jobs/employer`, {
+useEffect(() => {
+  const fetchJobs = async () => {
+    setLoadingJobs(true);
+    try {
+      await toast.promise(
+        axios.get(`${backendUrl}/api/jobs/employer`, {
           withCredentials: true,
           params: { page: 1, limit: 1000 },
-        });
-        if (response.data.success) {
-          setJobs(response.data.data.jobs);
-        } else {
-          toast.error("Failed to load jobs");
+        }),
+        {
+          loading: "Loading jobs... ⏳",
+          success: (res) => {
+            if (res.data.success) {
+              setJobs(res.data.data.jobs);
+              return "Jobs loaded ✅";
+            }
+            throw new Error("Failed to load jobs");
+          },
+          error: "Error loading jobs ❌",
         }
-      } catch (err) {
-        console.error(err);
-        toast.error("Error loading jobs");
-      } finally {
-        setLoadingJobs(false);
-      }
+      );
+    } finally {
+      setLoadingJobs(false);
     }
-    fetchJobs();
-  }, []);
+  };
+  fetchJobs();
+}, []);
+
 
   // Fetch applications
-  useEffect(() => {
-    if (!selectedJobId) {
-      setApplications([]);
-      setTotalPages(1);
-      return;
-    }
-    async function fetchApplications() {
-      setLoadingApplications(true);
-      try {
-        const response = await axios.get(
-          `${backendUrl}/api/jobs/${selectedJobId}/applications`,
-          {
-            withCredentials: true,
-            params: { page, limit: 10 },
-          }
-        );
-        if (response.data.success) {
-          setApplications(response.data.data.applications);
-          setTotalPages(response.data.data.pagination.pages);
-        } else {
-          toast.error("Failed to load applications");
+useEffect(() => {
+  if (!selectedJobId) {
+    setApplications([]);
+    setTotalPages(1);
+    return;
+  }
+
+  const fetchApplications = async () => {
+    setLoadingApplications(true);
+    try {
+      await toast.promise(
+        axios.get(`${backendUrl}/api/jobs/${selectedJobId}/applications`, {
+          withCredentials: true,
+          params: { page, limit: 10 },
+        }),
+        {
+          loading: "Loading applications... ⏳",
+          success: (res) => {
+            if (res.data.success) {
+              setApplications(res.data.data.applications);
+              setTotalPages(res.data.data.pagination.pages);
+              return "Applications loaded ✅";
+            }
+            throw new Error("Failed to load applications");
+          },
+          error: "Error loading applications ❌",
         }
-      } catch (err) {
-        console.error(err);
-        toast.error("Error loading applications");
-      } finally {
-        setLoadingApplications(false);
-      }
+      );
+    } finally {
+      setLoadingApplications(false);
     }
-    fetchApplications();
-  }, [selectedJobId, page]);
+  };
+
+  fetchApplications();
+}, [selectedJobId, page]);
+
 
   // Update application status
   async function updateApplicationStatus(applicationId: number, newStatus: string) {

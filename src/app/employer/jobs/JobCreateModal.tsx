@@ -268,7 +268,7 @@ const validateField = (name: string, value: string | number | undefined): string
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[95vh] overflow-hidden shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div>
@@ -315,7 +315,7 @@ const validateField = (name: string, value: string | number | undefined): string
                 onBlur={handleBlur}
                 placeholder="e.g. Senior Frontend Developer"
                 disabled={isSubmitting}
-                className={getInputClassName('title', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed')}
+                className={getInputClassName('title', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-gray-400')}
                 required
               />
               {renderFieldError('title')}
@@ -332,7 +332,7 @@ const validateField = (name: string, value: string | number | undefined): string
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isSubmitting}
-                className={getInputClassName('role', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed')}
+                className={getInputClassName('role', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-gray-900')}
                 required
               >
                 <option value="">Select a role</option>
@@ -358,7 +358,7 @@ const validateField = (name: string, value: string | number | undefined): string
                 placeholder="Describe the role, responsibilities, and what you're looking for..."
                 rows={4}
                 disabled={isSubmitting}
-                className={getInputClassName('description', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed')}
+                className={getInputClassName('description', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-gray-400')}
                 required
               />
               <div className="flex justify-between items-center mt-1">
@@ -382,7 +382,7 @@ const validateField = (name: string, value: string | number | undefined): string
                 placeholder="List the skills, experience, and qualifications needed..."
                 rows={3}
                 disabled={isSubmitting}
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-gray-400"
               />
             </div>
 
@@ -400,7 +400,7 @@ const validateField = (name: string, value: string | number | undefined): string
                   onBlur={handleBlur}
                   placeholder="e.g. San Francisco, CA or Remote"
                   disabled={isSubmitting}
-                  className={getInputClassName('location', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed')}
+                  className={getInputClassName('location', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-gray-400')}
                 />
                 {renderFieldError('location')}
               </div>
@@ -414,7 +414,7 @@ const validateField = (name: string, value: string | number | undefined): string
                   value={form.jobType}
                   onChange={handleChange}
                   disabled={isSubmitting}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-gray-900"
                 >
                   {JOB_TYPES.map((type) => (
                     <option key={type.value} value={type.value}>
@@ -441,7 +441,7 @@ const validateField = (name: string, value: string | number | undefined): string
                     placeholder="Minimum salary"
                     min="0"
                     disabled={isSubmitting}
-                    className={getInputClassName('salaryMin', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed')}
+                    className={getInputClassName('salaryMin', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-gray-400')}
                   />
                   {renderFieldError('salaryMin')}
                 </div>
@@ -455,7 +455,7 @@ const validateField = (name: string, value: string | number | undefined): string
                     placeholder="Maximum salary"
                     min="0"
                     disabled={isSubmitting}
-                    className={getInputClassName('salaryMax', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed')}
+                    className={getInputClassName('salaryMax', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-gray-400')}
                   />
                   {renderFieldError('salaryMax')}
                 </div>
@@ -477,7 +477,7 @@ const validateField = (name: string, value: string | number | undefined): string
                 min="1"
                 max="100"
                 disabled={isSubmitting}
-                className={getInputClassName('noOfOpenings', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed')}
+                className={getInputClassName('noOfOpenings', 'w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed placeholder:text-gray-400')}
               />
               {renderFieldError('noOfOpenings')}
             </div>
@@ -485,7 +485,7 @@ const validateField = (name: string, value: string | number | undefined): string
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-4 p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex justify-end gap-4 p-6 pt-2 border-t border-gray-200 bg-gray-50">
           <button
             type="button"
             onClick={onClose}

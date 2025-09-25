@@ -7,6 +7,7 @@ import EmployerProfileForm from './EmployerProfileForm';
 import CompanySelection from './CompanySelection';
 import EmployerProfileView from './EmployerProfileView';
 import { ProfileStatus, EmployerProfile, ProfileStatusResponse, EmployerProfileResponse } from './types';
+import {toast} from "sonner"
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -41,16 +42,24 @@ export default function EmployerProfilePage() {
   };
 
   // Fetch full profile data for completed profiles
-  const fetchProfile = async (): Promise<void> => {
-    try {
-      const res = await axios.get<EmployerProfileResponse>(`${backendUrl}/api/employer/profile`, {
-        withCredentials: true,
-      });
-      setProfileData(res.data.data);
-    } catch (error) {
-      console.error('Failed to fetch employer profile', error);
-    }
-  };
+ const fetchProfile = async (): Promise<void> => {
+  try {
+    await toast.promise(
+      axios.get(`${backendUrl}/api/employer/profile`, { withCredentials: true }),
+      {
+        loading: "Fetching profile... ⏳",
+        success: (res) => {
+          setProfileData(res.data.data);
+          return "Profile loaded ✅";
+        },
+        error: "Failed to fetch profile ❌",
+      }
+    );
+  } catch (error) {
+    console.error("Profile fetch error:", error);
+  }
+};
+
 
   useEffect(() => {
     fetchProfileStatus();
