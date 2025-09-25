@@ -127,7 +127,7 @@ router.push('/jobseeker');
                       required
                       value={loginData.email}
                       onChange={handleLoginChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 outline-none"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 outline-none placeholder:text-gray-400 text-gray-900"
                       placeholder="Enter your email"
                     />
                   </div>
@@ -149,7 +149,7 @@ router.push('/jobseeker');
                       required
                       value={loginData.password}
                       onChange={handleLoginChange}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 outline-none"
+                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 outline-none placeholder:text-gray-400 text-gray-900"
                       placeholder="Enter your password"
                     />
                     <button
@@ -203,7 +203,7 @@ router.push('/jobseeker');
                       required
                       value={signupData.name}
                       onChange={handleSignupChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 outline-none"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 outline-none placeholder:text-gray-400 text-gray-900"
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -225,7 +225,7 @@ router.push('/jobseeker');
                       required
                       value={signupData.email}
                       onChange={handleSignupChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 outline-none"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 outline-none placeholder:text-gray-400 text-gray-900"
                       placeholder="Enter your email"
                     />
                   </div>
@@ -247,7 +247,7 @@ router.push('/jobseeker');
                       required
                       value={signupData.password}
                       onChange={handleSignupChange}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 outline-none"
+                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 outline-none placeholder:text-gray-400 text-gray-900"
                       placeholder="Create a password"
                     />
                     <button
