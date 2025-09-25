@@ -72,7 +72,7 @@ export default function BasicDetailsForm({ onComplete, defaultName = '' }: Props
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 placeholder:text-gray-400 text-gray-900"
           required
           minLength={2}
           maxLength={50}
@@ -87,7 +87,7 @@ export default function BasicDetailsForm({ onComplete, defaultName = '' }: Props
           name="phone"
           value={formData.phone}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 placeholder:text-gray-400 text-gray-900"
           required
           minLength={10}
           maxLength={15}
@@ -103,7 +103,7 @@ export default function BasicDetailsForm({ onComplete, defaultName = '' }: Props
           name="location"
           value={formData.location}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 placeholder:text-gray-400 text-gray-900"
           required
           minLength={2}
           maxLength={100}
@@ -120,7 +120,7 @@ export default function BasicDetailsForm({ onComplete, defaultName = '' }: Props
           name="profilePicture"
           value={formData.profilePicture}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 placeholder:text-gray-400 text-gray-900"
           placeholder="https://example.com/image.jpg"
         />
       </div>

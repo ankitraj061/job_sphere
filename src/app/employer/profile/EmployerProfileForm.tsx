@@ -81,7 +81,7 @@ try {
           name="jobTitle"
           value={formData.jobTitle}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none placeholder:text-gray-400 text-gray-900"
           required
           minLength={2}
           maxLength={100}
@@ -99,7 +99,7 @@ try {
           name="department"
           value={formData.department}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none placeholder:text-gray-400 text-gray-900"
           required
           minLength={2}
           maxLength={50}
@@ -117,7 +117,7 @@ try {
           value={formData.role}
           onChange={handleChange}
           required
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-500 focus:outline-none"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-green-500 focus:outline-none placeholder:text-gray-400 text-gray-900"
         >
           {roleOptions.map(({ label, value }) => (
             <option key={value} value={value}>
